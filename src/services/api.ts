@@ -15,6 +15,26 @@ export const getCharacter = async (id: string) => {
 };
 
 export const getStarship = async (id: string) => {
-    const response = await api.get(`/starships/${id}`);
-    return response.data;
-  };
+  const response = await api.get(`/starships/${id}`);
+  return response.data;
+};
+
+export const getVehicle = async (id: string) => {
+  const response = await api.get(`/vehicles/${id}`);
+  return response.data;
+};
+
+export const getSpecies = async (id: string) => {
+  const response = await api.get(`/species/${id}`);
+  return response.data;
+};
+
+export const getFilm = async (id: string) => {
+  const response = await api.get(`/films/${id}`);
+  return response.data;
+};
+
+export const getPlanet = async (id: string) => {
+  const response = await api.get(`/planets/${id}`);
+  return response.data;
+};
