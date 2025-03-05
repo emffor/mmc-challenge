@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getCharacter, getStarship, getVehicle, getSpecies, getFilm, getPlanet } from '../../services/api';
 import * as S from './styles';
@@ -108,7 +108,6 @@ type Planet = {
 const CharacterDetail = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-
   const [character, setCharacter] = useState<Character | null>(null);
   const [loading, setLoading] = useState(true);
   const [starships, setStarships] = useState<{ [key: string]: Starship }>({});
@@ -116,11 +115,30 @@ const CharacterDetail = () => {
   const [species, setSpecies] = useState<{ [key: string]: Species }>({});
   const [films, setFilms] = useState<{ [key: string]: Film }>({});
   const [homeworld, setHomeworld] = useState<Planet | null>(null);
-
   const [hoveredFilm, setHoveredFilm] = useState<string | null>(null);
   const [hoveredSpecies, setHoveredSpecies] = useState<string | null>(null);
   const [hoveredVehicle, setHoveredVehicle] = useState<string | null>(null);
   const [hoveredStarship, setHoveredStarship] = useState<string | null>(null);
+  const touchTimer = useRef<NodeJS.Timeout | null>(null);
+  const hoverTimer = useRef<NodeJS.Timeout | null>(null);
+  const hoverDelayTime = 300;
+  const [isMobile, setIsMobile] = useState(false);
+  const [isSmallScreen, setIsSmallScreen] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      const isMobileDevice = window.matchMedia('(max-width: 768px)').matches || 
+                            'ontouchstart' in window || 
+                            navigator.maxTouchPoints > 0;
+      setIsMobile(isMobileDevice);
+      setIsSmallScreen(window.matchMedia('(max-width: 380px)').matches);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+    };
+  }, []);
 
   useEffect(() => {
     const user = localStorage.getItem('user');
@@ -128,83 +146,191 @@ const CharacterDetail = () => {
       navigate('/login');
       return;
     }
-
     fetchCharacter();
   }, [id, navigate]);
+
+  const handleMouseEnter = (
+    itemUrl: string,
+    setter: React.Dispatch<React.SetStateAction<string | null>>
+  ) => {
+    if (isMobile) return;
+    if (hoverTimer.current) {
+      clearTimeout(hoverTimer.current);
+    }
+    hoverTimer.current = setTimeout(() => {
+      setter(itemUrl);
+    }, hoverDelayTime);
+  };
+
+  const handleMouseLeave = (
+    setter: React.Dispatch<React.SetStateAction<string | null>>
+  ) => {
+    if (isMobile) return;
+    if (hoverTimer.current) {
+      clearTimeout(hoverTimer.current);
+      hoverTimer.current = null;
+    }
+    setter(null);
+  };
+
+  const handleItemClick = (
+    itemUrl: string,
+    setter: React.Dispatch<React.SetStateAction<string | null>>,
+    currentState: string | null,
+    event: React.MouseEvent
+  ) => {
+    const target = event.target as HTMLElement;
+    const isCloseButton = target.classList.contains('close-btn');
+    if (isCloseButton) {
+      if (currentState === itemUrl) {
+        setter(null);
+      }
+      event.stopPropagation();
+    } else if (isMobile) {
+      if (currentState !== itemUrl) {
+        setter(itemUrl);
+      }
+    }
+  };
+
+  const handleCloseItem = (
+    setter: React.Dispatch<React.SetStateAction<string | null>>,
+    event: React.MouseEvent
+  ) => {
+    setter(null);
+    event.stopPropagation();
+  };
 
   const fetchCharacter = async () => {
     try {
       setLoading(true);
       const data = await getCharacter(id || '1');
       setCharacter(data);
-
-      const starshipsData: { [key: string]: Starship } = {};
-      for (const starshipUrl of data.starships) {
-        const starshipId = starshipUrl.split('/').filter(Boolean).pop();
-        if (starshipId) {
-          try {
-            const starshipData = await getStarship(starshipId);
-            starshipsData[starshipUrl] = starshipData;
-          } catch (error) {
-            console.error(`Erro ao buscar detalhes da nave ${starshipId}:`, error);
-          }
-        }
+      const fetchPromises = [];
+      if (data.starships.length > 0) {
+        fetchPromises.push(
+          Promise.all(
+            data.starships.map(async (starshipUrl) => {
+              const starshipId = starshipUrl.split('/').filter(Boolean).pop();
+              if (starshipId) {
+                try {
+                  const starshipData = await getStarship(starshipId);
+                  return { url: starshipUrl, data: starshipData };
+                } catch (error) {
+                  console.error(`Erro ao buscar detalhes da nave ${starshipId}:`, error);
+                  return null;
+                }
+              }
+              return null;
+            })
+          ).then((results) => {
+            const starshipsData: { [key: string]: Starship } = {};
+            results.filter(Boolean).forEach((item) => {
+              if (item) {
+                starshipsData[item.url] = item.data;
+              }
+            });
+            setStarships(starshipsData);
+          })
+        );
       }
-      setStarships(starshipsData);
-
-      const vehiclesData: { [key: string]: Vehicle } = {};
-      for (const vehicleUrl of data.vehicles) {
-        const vehicleId = vehicleUrl.split('/').filter(Boolean).pop();
-        if (vehicleId) {
-          try {
-            const vehicleData = await getVehicle(vehicleId);
-            vehiclesData[vehicleUrl] = vehicleData;
-          } catch (error) {
-            console.error(`Erro ao buscar detalhes do veículo ${vehicleId}:`, error);
-          }
-        }
+      if (data.vehicles.length > 0) {
+        fetchPromises.push(
+          Promise.all(
+            data.vehicles.map(async (vehicleUrl) => {
+              const vehicleId = vehicleUrl.split('/').filter(Boolean).pop();
+              if (vehicleId) {
+                try {
+                  const vehicleData = await getVehicle(vehicleId);
+                  return { url: vehicleUrl, data: vehicleData };
+                } catch (error) {
+                  console.error(`Erro ao buscar detalhes do veículo ${vehicleId}:`, error);
+                  return null;
+                }
+              }
+              return null;
+            })
+          ).then((results) => {
+            const vehiclesData: { [key: string]: Vehicle } = {};
+            results.filter(Boolean).forEach((item) => {
+              if (item) {
+                vehiclesData[item.url] = item.data;
+              }
+            });
+            setVehicles(vehiclesData);
+          })
+        );
       }
-      setVehicles(vehiclesData);
-
-      const speciesData: { [key: string]: Species } = {};
-      for (const speciesUrl of data.species) {
-        const speciesId = speciesUrl.split('/').filter(Boolean).pop();
-        if (speciesId) {
-          try {
-            const speciesDataItem = await getSpecies(speciesId);
-            speciesData[speciesUrl] = speciesDataItem;
-          } catch (error) {
-            console.error(`Erro ao buscar detalhes da espécie ${speciesId}:`, error);
-          }
-        }
+      if (data.species.length > 0) {
+        fetchPromises.push(
+          Promise.all(
+            data.species.map(async (speciesUrl) => {
+              const speciesId = speciesUrl.split('/').filter(Boolean).pop();
+              if (speciesId) {
+                try {
+                  const speciesData = await getSpecies(speciesId);
+                  return { url: speciesUrl, data: speciesData };
+                } catch (error) {
+                  console.error(`Erro ao buscar detalhes da espécie ${speciesId}:`, error);
+                  return null;
+                }
+              }
+              return null;
+            })
+          ).then((results) => {
+            const speciesData: { [key: string]: Species } = {};
+            results.filter(Boolean).forEach((item) => {
+              if (item) {
+                speciesData[item.url] = item.data;
+              }
+            });
+            setSpecies(speciesData);
+          })
+        );
       }
-      setSpecies(speciesData);
-
-      const filmsData: { [key: string]: Film } = {};
-      for (const filmUrl of data.films) {
-        const filmId = filmUrl.split('/').filter(Boolean).pop();
-        if (filmId) {
-          try {
-            const filmData = await getFilm(filmId);
-            filmsData[filmUrl] = filmData;
-          } catch (error) {
-            console.error(`Erro ao buscar detalhes do filme ${filmId}:`, error);
-          }
-        }
+      if (data.films.length > 0) {
+        fetchPromises.push(
+          Promise.all(
+            data.films.map(async (filmUrl) => {
+              const filmId = filmUrl.split('/').filter(Boolean).pop();
+              if (filmId) {
+                try {
+                  const filmData = await getFilm(filmId);
+                  return { url: filmUrl, data: filmData };
+                } catch (error) {
+                  console.error(`Erro ao buscar detalhes do filme ${filmId}:`, error);
+                  return null;
+                }
+              }
+              return null;
+            })
+          ).then((results) => {
+            const filmsData: { [key: string]: Film } = {};
+            results.filter(Boolean).forEach((item) => {
+              if (item) {
+                filmsData[item.url] = item.data;
+              }
+            });
+            setFilms(filmsData);
+          })
+        );
       }
-      setFilms(filmsData);
-
       if (data.homeworld) {
-        const planetId = data.homeworld.split('/').filter(Boolean).pop();
-        if (planetId) {
-          try {
-            const planetData = await getPlanet(planetId);
-            setHomeworld(planetData);
-          } catch (error) {
-            console.error(`Erro ao buscar detalhes do planeta ${planetId}:`, error);
-          }
-        }
+        fetchPromises.push(
+          (async () => {
+            const planetId = data.homeworld.split('/').filter(Boolean).pop();
+            if (planetId) {
+              try {
+                const planetData = await getPlanet(planetId);
+                setHomeworld(planetData);
+              } catch (error) {
+                console.error(`Erro ao buscar detalhes do planeta ${planetId}:`, error);
+              }
+            }
+          })()
+        );
       }
+      await Promise.allSettled(fetchPromises);
     } catch (error) {
       console.error('Erro ao buscar detalhes do personagem:', error);
     } finally {
@@ -213,24 +339,33 @@ const CharacterDetail = () => {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('pt-BR');
+    try {
+      return new Date(dateString).toLocaleDateString('pt-BR');
+    } catch (e) {
+      return dateString;
+    }
   };
 
+  useEffect(() => {
+    return () => {
+      if (touchTimer.current) clearTimeout(touchTimer.current);
+      if (hoverTimer.current) clearTimeout(hoverTimer.current);
+    };
+  }, []);
+
   return (
-    <S.Container>
+    <S.Container $isSmallScreen={isSmallScreen}>
       <S.BackButton onClick={() => navigate('/home')}>
         ← Voltar para lista
       </S.BackButton>
-
       {loading ? (
         <S.Loader>
           <div className="spinner"></div>
         </S.Loader>
       ) : character ? (
-        <S.Card>
+        <S.Card $isSmallScreen={isSmallScreen}>
           <h1>{character.name}</h1>
-
-          <S.InfoGrid>
+          <S.InfoGrid $isSmallScreen={isSmallScreen}>
             <S.InfoItem>
               <h3>Altura</h3>
               <p>{character.height} cm</p>
@@ -259,7 +394,7 @@ const CharacterDetail = () => {
               <h3>Gênero</h3>
               <p>{character.gender}</p>
             </S.InfoItem>
-            <S.InfoItem>
+            <S.InfoItem $fullWidth={isSmallScreen}>
               <h3>Planeta Natal</h3>
               {homeworld ? (
                 <div>
@@ -282,9 +417,8 @@ const CharacterDetail = () => {
               <p>{formatDate(character.edited)}</p>
             </S.InfoItem>
           </S.InfoGrid>
-
           {character.films.length > 0 && (
-            <S.FilmsList>
+            <S.FilmsList $isSmallScreen={isSmallScreen}>
               <h2>Filmes</h2>
               <ul>
                 {character.films.map((filmUrl, index) => {
@@ -294,8 +428,11 @@ const CharacterDetail = () => {
                     <S.FilmItem
                       key={index}
                       $expanded={isExpanded}
-                      onMouseEnter={() => setHoveredFilm(filmUrl)}
-                      onMouseLeave={() => setHoveredFilm(null)}
+                      $isSmallScreen={isSmallScreen}
+                      onMouseEnter={() => handleMouseEnter(filmUrl, setHoveredFilm)}
+                      onMouseLeave={() => handleMouseLeave(setHoveredFilm)}
+                      onClick={(e) => handleItemClick(filmUrl, setHoveredFilm, hoveredFilm, e)}
+                      aria-expanded={isExpanded}
                     >
                       <h3>{film ? film.title : `Filme ${index + 1}`}</h3>
                       {isExpanded && (
@@ -306,22 +443,28 @@ const CharacterDetail = () => {
                               <p><strong>Diretor:</strong> {film.director}</p>
                               <p><strong>Produtor:</strong> {film.producer}</p>
                               <p><strong>Data de lançamento:</strong> {formatDate(film.release_date)}</p>
-                              <p><strong>Texto de abertura:</strong> {film.opening_crawl.substring(0, 100)}...</p>
+                              <p><strong>Texto de abertura:</strong> {film.opening_crawl.substring(0, isSmallScreen ? 70 : 100)}...</p>
                             </div>
                           ) : (
                             <p>Carregando detalhes...</p>
                           )}
                         </div>
                       )}
+                      <S.CloseButton 
+                        className="close-btn"
+                        $isExpanded={isExpanded}
+                        $isSmallScreen={isSmallScreen}
+                        onClick={(e) => isExpanded && handleCloseItem(setHoveredFilm, e)}
+                        aria-label="Fechar detalhes"
+                      />
                     </S.FilmItem>
                   );
                 })}
               </ul>
             </S.FilmsList>
           )}
-
           {character.species.length > 0 && (
-            <S.FilmsList>
+            <S.FilmsList $isSmallScreen={isSmallScreen}>
               <h2>Espécies</h2>
               <ul>
                 {character.species.map((speciesUrl, index) => {
@@ -331,8 +474,11 @@ const CharacterDetail = () => {
                     <S.FilmItem
                       key={index}
                       $expanded={isExpanded}
-                      onMouseEnter={() => setHoveredSpecies(speciesUrl)}
-                      onMouseLeave={() => setHoveredSpecies(null)}
+                      $isSmallScreen={isSmallScreen}
+                      onMouseEnter={() => handleMouseEnter(speciesUrl, setHoveredSpecies)}
+                      onMouseLeave={() => handleMouseLeave(setHoveredSpecies)}
+                      onClick={(e) => handleItemClick(speciesUrl, setHoveredSpecies, hoveredSpecies, e)}
+                      aria-expanded={isExpanded}
                     >
                       <h3>{speciesItem ? speciesItem.name : `Espécie ${index + 1}`}</h3>
                       {isExpanded && (
@@ -350,15 +496,21 @@ const CharacterDetail = () => {
                           )}
                         </div>
                       )}
+                      <S.CloseButton 
+                        className="close-btn"
+                        $isExpanded={isExpanded}
+                        $isSmallScreen={isSmallScreen}
+                        onClick={(e) => isExpanded && handleCloseItem(setHoveredSpecies, e)}
+                        aria-label="Fechar detalhes"
+                      />
                     </S.FilmItem>
                   );
                 })}
               </ul>
             </S.FilmsList>
           )}
-
           {character.vehicles.length > 0 && (
-            <S.FilmsList>
+            <S.FilmsList $isSmallScreen={isSmallScreen}>
               <h2>Veículos</h2>
               <ul>
                 {character.vehicles.map((vehicleUrl, index) => {
@@ -368,8 +520,11 @@ const CharacterDetail = () => {
                     <S.FilmItem
                       key={index}
                       $expanded={isExpanded}
-                      onMouseEnter={() => setHoveredVehicle(vehicleUrl)}
-                      onMouseLeave={() => setHoveredVehicle(null)}
+                      $isSmallScreen={isSmallScreen}
+                      onMouseEnter={() => handleMouseEnter(vehicleUrl, setHoveredVehicle)}
+                      onMouseLeave={() => handleMouseLeave(setHoveredVehicle)}
+                      onClick={(e) => handleItemClick(vehicleUrl, setHoveredVehicle, hoveredVehicle, e)}
+                      aria-expanded={isExpanded}
                     >
                       <h3>{vehicle ? vehicle.name : `Veículo ${index + 1}`}</h3>
                       {isExpanded && (
@@ -388,15 +543,21 @@ const CharacterDetail = () => {
                           )}
                         </div>
                       )}
+                      <S.CloseButton 
+                        className="close-btn"
+                        $isExpanded={isExpanded}
+                        $isSmallScreen={isSmallScreen}
+                        onClick={(e) => isExpanded && handleCloseItem(setHoveredVehicle, e)}
+                        aria-label="Fechar detalhes"
+                      />
                     </S.FilmItem>
                   );
                 })}
               </ul>
             </S.FilmsList>
           )}
-
           {character.starships.length > 0 && (
-            <S.FilmsList>
+            <S.FilmsList $isSmallScreen={isSmallScreen}>
               <h2>Naves</h2>
               <ul>
                 {character.starships.map((starshipUrl, index) => {
@@ -406,8 +567,11 @@ const CharacterDetail = () => {
                     <S.FilmItem
                       key={index}
                       $expanded={isExpanded}
-                      onMouseEnter={() => setHoveredStarship(starshipUrl)}
-                      onMouseLeave={() => setHoveredStarship(null)}
+                      $isSmallScreen={isSmallScreen}
+                      onMouseEnter={() => handleMouseEnter(starshipUrl, setHoveredStarship)}
+                      onMouseLeave={() => handleMouseLeave(setHoveredStarship)}
+                      onClick={(e) => handleItemClick(starshipUrl, setHoveredStarship, hoveredStarship, e)}
+                      aria-expanded={isExpanded}
                     >
                       <h3>{starship ? starship.name : `Nave ${index + 1}`}</h3>
                       {isExpanded && (
@@ -426,13 +590,19 @@ const CharacterDetail = () => {
                           )}
                         </div>
                       )}
+                      <S.CloseButton 
+                        className="close-btn"
+                        $isExpanded={isExpanded}
+                        $isSmallScreen={isSmallScreen}
+                        onClick={(e) => isExpanded && handleCloseItem(setHoveredStarship, e)}
+                        aria-label="Fechar detalhes"
+                      />
                     </S.FilmItem>
                   );
                 })}
               </ul>
             </S.FilmsList>
           )}
-
           <S.InfoItem style={{ marginTop: '1.5rem' }}>
             <h3>URL na API</h3>
             <p style={{ fontSize: '0.9rem', wordBreak: 'break-all' }}>{character.url}</p>
