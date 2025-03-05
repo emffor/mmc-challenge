@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getCharacter } from '../../services/api';
+import { getCharacter, getStarship } from '../../services/api';
 import * as S from './styles';
+
+
 
 type Character = {
   name: string;
@@ -22,12 +24,25 @@ type Character = {
   url: string;
 };
 
+type Starship = {
+  name: string;
+  model: string;
+  manufacturer: string;
+  cost_in_credits: string;
+  length: string;
+  max_atmosphering_speed: string;
+  hyperdrive_rating: string;
+  starship_class: string;
+  url: string;
+};
+
 const CharacterDetail = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const [character, setCharacter] = useState<Character | null>(null);
   const [loading, setLoading] = useState(true);
   const [filmTitles, setFilmTitles] = useState<{ [key: string]: string }>({});
+    const [starships, setStarships] = useState<{ [key: string]: Starship }>({});
   
   useEffect(() => {
     const user = localStorage.getItem('user');
@@ -39,25 +54,40 @@ const CharacterDetail = () => {
     fetchCharacter();
   }, [id, navigate]);
   
-  const fetchCharacter = async () => {
-    try {
-      setLoading(true);
-      const data = await getCharacter(id || '1');
-      setCharacter(data);
-      
-      const filmMap: { [key: string]: string } = {};
-      
-      data.films.forEach((filmUrl: string) => {
-        const filmId = filmUrl.split('/').filter(Boolean).pop();
-        filmMap[filmUrl] = `Episódio ${Number(filmId)}`;
-      });
-      
-      setFilmTitles(filmMap);
-    } catch (error) {
-      console.error('Erro ao buscar detalhes do personagem:', error);
-    } finally {
-      setLoading(false);
-    }
+    const fetchCharacter = async () => {
+      try {
+        setLoading(true);
+        const data = await getCharacter(id || '1');
+        setCharacter(data);
+        
+        const filmMap: { [key: string]: string } = {};
+        
+        data.films.forEach((filmUrl: string) => {
+          const filmId = filmUrl.split('/').filter(Boolean).pop();
+          filmMap[filmUrl] = `Episódio ${Number(filmId)}`;
+        });
+        
+        setFilmTitles(filmMap);
+        
+        // Buscar detalhes das naves
+        const starshipsData: { [key: string]: Starship } = {};
+        for (const starshipUrl of data.starships) {
+          const starshipId = starshipUrl.split('/').filter(Boolean).pop();
+          if (starshipId) {
+            try {
+              const starshipData = await getStarship(starshipId);
+              starshipsData[starshipUrl] = starshipData;
+            } catch (error) {
+              console.error(`Erro ao buscar detalhes da nave ${starshipId}:`, error);
+            }
+          }
+        }
+        setStarships(starshipsData);
+      } catch (error) {
+        console.error('Erro ao buscar detalhes do personagem:', error);
+      } finally {
+        setLoading(false);
+      }
   };
   
   const formatDate = (dateString: string) => {
@@ -171,11 +201,33 @@ const CharacterDetail = () => {
             <S.FilmsList>
               <h2>Naves</h2>
               <ul>
-                {character.starships.map((starship, index) => (
-                  <S.FilmItem key={index}>
-                    {starship.split('/').filter(Boolean).pop() || `Nave ${index + 1}`}
-                  </S.FilmItem>
-                ))}
+                {character.starships.map((starshipUrl, index) => {
+                  const starship = starships[starshipUrl];
+                  return (
+                    <S.FilmItem key={index} style={{ 
+                      display: 'block',
+                      width: '100%', 
+                      padding: '1rem',
+                      marginBottom: '0.5rem' 
+                    }}>
+                      <h3 style={{ fontSize: '1.1rem', marginBottom: '0.5rem' }}>
+                        {starship ? starship.name : `Nave ${index + 1}`}
+                      </h3>
+                      {starship ? (
+                        <div style={{ fontSize: '0.9rem' }}>
+                          <p><strong>Modelo:</strong> {starship.model}</p>
+                          <p><strong>Fabricante:</strong> {starship.manufacturer}</p>
+                          <p><strong>Classe:</strong> {starship.starship_class}</p>
+                          <p><strong>Comprimento:</strong> {starship.length} m</p>
+                          <p><strong>Velocidade máxima:</strong> {starship.max_atmosphering_speed}</p>
+                          <p><strong>Hyperdrive:</strong> {starship.hyperdrive_rating}</p>
+                        </div>
+                      ) : (
+                        <p>Carregando detalhes...</p>
+                      )}
+                    </S.FilmItem>
+                  );
+                })}
               </ul>
             </S.FilmsList>
           )}
