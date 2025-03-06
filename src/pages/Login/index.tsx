@@ -1,9 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Container } from '../../components/layout/Container';
 import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
-import { Card } from '../../components/ui/Card';
 import { Loader } from '../../components/feedback/Loader';
 import { LoginFormData } from './types';
 import * as S from './styles';
@@ -15,6 +13,11 @@ const Login = () => {
     password: ''
   });
   const [loading, setLoading] = useState(false);
+  const [animation, setAnimation] = useState(false);
+
+  useEffect(() => {
+    setAnimation(true);
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -35,40 +38,46 @@ const Login = () => {
   };
 
   return (
-    <Container centerContent padding="2rem">
-      <Card padding="2.5rem" style={{ maxWidth: '450px', width: '100%' }}>
+    <S.AuthContainer>
+      <S.StarsBackground />
+      <S.AuthCard $show={animation}>
+        <S.LogoArea>
+          <S.LogoImage>SW</S.LogoImage>
+          <S.LogoText>Star Wars Explorer</S.LogoText>
+        </S.LogoArea>
+        
         <form onSubmit={handleSubmit}>
-          <h1 style={{ 
-            marginBottom: '2rem', 
-            fontSize: '2rem', 
-            fontWeight: 600, 
-            color: 'var(--text-primary)', 
-            textAlign: 'center' 
-          }}>
+          <S.FormTitle>
             Login
-          </h1>
+          </S.FormTitle>
           
-          <Input
-            type="email"
-            name="email"
-            placeholder="E-mail" 
-            value={formData.email}
-            onChange={handleChange}
-            fullWidth
-            required
-          />
+          <S.InputGroup>
+            <S.InputLabel>Email</S.InputLabel>
+            <Input
+              type="email"
+              name="email"
+              placeholder="seu@email.com" 
+              value={formData.email}
+              onChange={handleChange}
+              fullWidth
+              required
+            />
+          </S.InputGroup>
           
-          <Input 
-            type="password"
-            name="password" 
-            placeholder="Senha" 
-            value={formData.password}
-            onChange={handleChange}
-            fullWidth
-            required
-          />
+          <S.InputGroup>
+            <S.InputLabel>Senha</S.InputLabel>
+            <Input 
+              type="password"
+              name="password" 
+              placeholder="Sua senha" 
+              value={formData.password}
+              onChange={handleChange}
+              fullWidth
+              required
+            />
+          </S.InputGroup>
           
-          <div style={{ marginTop: '1.5rem' }}>
+          <S.ButtonWrapper>
             <Button 
               type="submit" 
               disabled={loading}
@@ -77,14 +86,14 @@ const Login = () => {
             >
               {loading ? <Loader size="20px" centered={false} /> : 'Entrar'}
             </Button>
-          </div>
+          </S.ButtonWrapper>
           
-          <S.Link onClick={() => navigate('/register')}>
-            Não tem uma conta? Registre-se
-          </S.Link>
+          <S.RegisterLink onClick={() => navigate('/register')}>
+            Não tem uma conta? <S.Highlight>Registre-se</S.Highlight>
+          </S.RegisterLink>
         </form>
-      </Card>
-    </Container>
+      </S.AuthCard>
+    </S.AuthContainer>
   );
 };
 

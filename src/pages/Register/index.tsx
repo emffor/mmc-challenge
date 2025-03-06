@@ -1,9 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Container } from '../../components/layout/Container';
 import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
-import { Card } from '../../components/ui/Card';
 import { Loader } from '../../components/feedback/Loader';
 import { RegisterFormData } from './types';
 import * as S from './styles';
@@ -18,10 +16,19 @@ const Register = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [animation, setAnimation] = useState(false);
+
+  useEffect(() => {
+    setAnimation(true);
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    
+    if (name === 'confirmPassword' || name === 'password') {
+      setError('');
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -48,61 +55,73 @@ const Register = () => {
   };
 
   return (
-    <Container centerContent padding="2rem">
-      <Card padding="2.5rem" style={{ maxWidth: '450px', width: '100%' }}>
+    <S.AuthContainer>
+      <S.StarsBackground />
+      <S.AuthCard $show={animation}>
+        <S.LogoArea>
+          <S.LogoImage>SW</S.LogoImage>
+          <S.LogoText>Star Wars Explorer</S.LogoText>
+        </S.LogoArea>
+        
         <form onSubmit={handleSubmit}>
-          <h1 style={{ 
-            marginBottom: '2rem', 
-            fontSize: '2rem', 
-            fontWeight: 600, 
-            color: 'var(--text-primary)', 
-            textAlign: 'center' 
-          }}>
+          <S.FormTitle>
             Criar Conta
-          </h1>
+          </S.FormTitle>
           
-          <Input 
-            type="text"
-            name="name" 
-            placeholder="Nome completo" 
-            value={formData.name}
-            onChange={handleChange}
-            fullWidth
-            required
-          />
+          <S.InputGroup>
+            <S.InputLabel>Nome Completo</S.InputLabel>
+            <Input 
+              type="text"
+              name="name" 
+              placeholder="Seu nome completo" 
+              value={formData.name}
+              onChange={handleChange}
+              fullWidth
+              required
+            />
+          </S.InputGroup>
           
-          <Input 
-            type="email"
-            name="email" 
-            placeholder="E-mail" 
-            value={formData.email}
-            onChange={handleChange}
-            fullWidth
-            required
-          />
+          <S.InputGroup>
+            <S.InputLabel>Email</S.InputLabel>
+            <Input 
+              type="email"
+              name="email" 
+              placeholder="seu@email.com" 
+              value={formData.email}
+              onChange={handleChange}
+              fullWidth
+              required
+            />
+          </S.InputGroup>
           
-          <Input 
-            type="password"
-            name="password" 
-            placeholder="Senha" 
-            value={formData.password}
-            onChange={handleChange}
-            fullWidth
-            required
-          />
+          <S.InputGroup>
+            <S.InputLabel>Senha</S.InputLabel>
+            <Input 
+              type="password"
+              name="password" 
+              placeholder="Crie uma senha" 
+              value={formData.password}
+              onChange={handleChange}
+              fullWidth
+              required
+            />
+          </S.InputGroup>
           
-          <Input 
-            type="password"
-            name="confirmPassword" 
-            placeholder="Confirmar senha" 
-            value={formData.confirmPassword}
-            onChange={handleChange}
-            error={error}
-            fullWidth
-            required
-          />
+          <S.InputGroup>
+            <S.InputLabel>Confirme a Senha</S.InputLabel>
+            <Input 
+              type="password"
+              name="confirmPassword" 
+              placeholder="Digite a senha novamente" 
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              error={error}
+              fullWidth
+              required
+            />
+          </S.InputGroup>
           
-          <div style={{ marginTop: '1.5rem' }}>
+          <S.ButtonWrapper>
             <Button 
               type="submit" 
               disabled={loading}
@@ -111,14 +130,14 @@ const Register = () => {
             >
               {loading ? <Loader size="20px" centered={false} /> : 'Registrar'}
             </Button>
-          </div>
+          </S.ButtonWrapper>
           
-          <S.Link onClick={() => navigate('/login')}>
-            Já tem uma conta? Faça login
-          </S.Link>
+          <S.RegisterLink onClick={() => navigate('/login')}>
+            Já tem uma conta? <S.Highlight>Faça login</S.Highlight>
+          </S.RegisterLink>
         </form>
-      </Card>
-    </Container>
+      </S.AuthCard>
+    </S.AuthContainer>
   );
 };
 
