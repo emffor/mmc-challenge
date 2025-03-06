@@ -1,32 +1,41 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as S from './styles';
+import { RegisterFormData } from './types';
 
 const Register = () => {
   const navigate = useNavigate();
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [formData, setFormData] = useState<RegisterFormData>({
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: ''
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
     
-    // Validação simples
-    if (password !== confirmPassword) {
+    if (formData.password !== formData.confirmPassword) {
       setError('As senhas não conferem');
       setLoading(false);
       return;
     }
     
-    // Simulação de registro
     setTimeout(() => {
-      if (name && email && password) {
-        localStorage.setItem('user', JSON.stringify({ name, email }));
+      if (formData.name && formData.email && formData.password) {
+        localStorage.setItem('user', JSON.stringify({ 
+          name: formData.name, 
+          email: formData.email 
+        }));
         navigate('/home');
       }
       setLoading(false);
@@ -39,38 +48,42 @@ const Register = () => {
         <h1>Criar Conta</h1>
         
         <S.Input 
-          type="text" 
+          type="text"
+          name="name" 
           placeholder="Nome completo" 
-          value={name}
-          onChange={(e) => setName(e.target.value)}
+          value={formData.name}
+          onChange={handleChange}
           required
         />
         
         <S.Input 
-          type="email" 
+          type="email"
+          name="email" 
           placeholder="E-mail" 
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          value={formData.email}
+          onChange={handleChange}
           required
         />
         
         <S.Input 
-          type="password" 
+          type="password"
+          name="password" 
           placeholder="Senha" 
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          value={formData.password}
+          onChange={handleChange}
           required
         />
         
         <S.Input 
-          type="password" 
+          type="password"
+          name="confirmPassword" 
           placeholder="Confirmar senha" 
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
+          value={formData.confirmPassword}
+          onChange={handleChange}
           required
         />
         
-        {error && <p style={{ color: 'var(--error)', marginTop: '0.5rem', fontSize: '0.9rem' }}>{error}</p>}
+        {error && <S.ErrorMessage>{error}</S.ErrorMessage>}
         
         <S.Button type="submit" disabled={loading}>
           {loading ? 'Carregando...' : 'Registrar'}

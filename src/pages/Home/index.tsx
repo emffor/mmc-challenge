@@ -1,14 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getCharacters } from '../../services/api';
 import * as S from './styles';
-
-type Character = {
-  name: string;
-  gender: string;
-  birth_year: string;
-  url: string;
-};
+import { Character } from './types';
 
 const Home = () => {
   const navigate = useNavigate();

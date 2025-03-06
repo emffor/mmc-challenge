@@ -1,21 +1,28 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as S from './styles';
+import { LoginFormData } from './types';
 
 const Login = () => {
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [formData, setFormData] = useState<LoginFormData>({
+    email: '',
+    password: ''
+  });
   const [loading, setLoading] = useState(false);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     
-    // Simulação de login
     setTimeout(() => {
-      if (email && password) {
-        localStorage.setItem('user', JSON.stringify({ email }));
+      if (formData.email && formData.password) {
+        localStorage.setItem('user', JSON.stringify({ email: formData.email }));
         navigate('/home');
       }
       setLoading(false);
@@ -27,17 +34,19 @@ const Login = () => {
       <S.Form onSubmit={handleSubmit}>
         <h1>Login</h1>
         <S.Input 
-          type="email" 
+          type="email"
+          name="email"
           placeholder="E-mail" 
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          value={formData.email}
+          onChange={handleChange}
           required
         />
         <S.Input 
-          type="password" 
+          type="password"
+          name="password" 
           placeholder="Senha" 
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          value={formData.password}
+          onChange={handleChange}
           required
         />
         <S.Button type="submit" disabled={loading}>

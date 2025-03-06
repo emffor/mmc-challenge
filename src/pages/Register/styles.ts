@@ -14,15 +14,11 @@ export const Form = styled(LoginForm)`
   max-width: 450px;
 `;
 
-export const InputGroup = styled.div`
-  display: flex;
-  gap: 1rem;
+export const ErrorMessage = styled.p`
+  color: var(--error);
+  margin-top: 0.5rem;
   margin-bottom: 0.5rem;
-  
-  @media (max-width: 480px) {
-    flex-direction: column;
-    gap: 0;
-  }
+  font-size: 0.9rem;
 `;
 
 export { Input, Button, Link };
