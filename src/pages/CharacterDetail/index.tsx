@@ -272,14 +272,16 @@ const CharacterDetail = () => {
 
   return (
     <Container padding={isSmallScreen ? '0.75rem' : 'clamp(1rem, 4vw, 2rem)'}>
-      <Button 
-        onClick={() => navigate('/home')} 
-        variant="outline" 
-        size={isSmallScreen ? 'small' : 'medium'}
-        style={{ marginBottom: 'clamp(1.5rem, 4vw, 2rem)' }}
-      >
-        ← Voltar para lista
-      </Button>
+      {!loading && (
+        <Button 
+          onClick={() => navigate('/home')} 
+          variant="outline" 
+          size={isSmallScreen ? 'small' : 'medium'}
+          style={{ marginBottom: 'clamp(1.5rem, 4vw, 2rem)' }}
+        >
+          ← Voltar para lista
+        </Button>
+      )}
       
       {loading ? (
         <S.LoaderWrapper>
