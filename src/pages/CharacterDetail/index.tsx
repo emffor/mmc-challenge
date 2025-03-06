@@ -34,6 +34,7 @@ const CharacterDetail = () => {
   const hoverDelayTime = 300;
   const [isMobile, setIsMobile] = useState(false);
   const [isSmallScreen, setIsSmallScreen] = useState(false);
+  const [loadingAnimation, setLoadingAnimation] = useState(true);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -114,6 +115,8 @@ const CharacterDetail = () => {
   const fetchCharacter = async () => {
     try {
       setLoading(true);
+      setLoadingAnimation(true);
+      
       const data = await getCharacter(id || '1');
       setCharacter(data);
       const fetchPromises = [];
@@ -245,6 +248,9 @@ const CharacterDetail = () => {
       console.error('Erro ao buscar detalhes do personagem:', error);
     } finally {
       setLoading(false);
+      setTimeout(() => {
+        setLoadingAnimation(false);
+      }, 300);
     }
   };
 
@@ -276,258 +282,262 @@ const CharacterDetail = () => {
       </Button>
       
       {loading ? (
-        <Loader />
+        <S.LoaderWrapper>
+          <Loader text="Carregando detalhes do personagem..." />
+        </S.LoaderWrapper>
       ) : character ? (
-        <Card padding={isSmallScreen ? '1rem 0.75rem' : 'clamp(1.25rem, 5vw, 2.5rem)'}>
-          <h1>{character.name}</h1>
-          <S.InfoGrid $isSmallScreen={isSmallScreen}>
-            <S.InfoItem>
-              <h3>Altura</h3>
-              <p>{character.height} cm</p>
-            </S.InfoItem>
-            <S.InfoItem>
-              <h3>Peso</h3>
-              <p>{character.mass} kg</p>
-            </S.InfoItem>
-            <S.InfoItem>
-              <h3>Cor do cabelo</h3>
-              <p>{character.hair_color}</p>
-            </S.InfoItem>
-            <S.InfoItem>
-              <h3>Cor da pele</h3>
-              <p>{character.skin_color}</p>
-            </S.InfoItem>
-            <S.InfoItem>
-              <h3>Cor dos olhos</h3>
-              <p>{character.eye_color}</p>
-            </S.InfoItem>
-            <S.InfoItem>
-              <h3>Nascimento</h3>
-              <p>{character.birth_year}</p>
-            </S.InfoItem>
-            <S.InfoItem>
-              <h3>Gênero</h3>
-              <p>{character.gender}</p>
-            </S.InfoItem>
-            <S.InfoItem $fullWidth={isSmallScreen}>
-              <h3>Planeta Natal</h3>
-              {homeworld ? (
-                <div>
-                  <p><strong>Nome:</strong> {homeworld.name}</p>
-                  <p><strong>Clima:</strong> {homeworld.climate}</p>
-                  <p><strong>Terreno:</strong> {homeworld.terrain}</p>
-                  <p><strong>População:</strong> {homeworld.population}</p>
-                  <p><strong>Diâmetro:</strong> {homeworld.diameter} km</p>
-                </div>
-              ) : (
-                <p>Carregando detalhes...</p>
-              )}
-            </S.InfoItem>
-            <S.InfoItem>
-              <h3>Data de Criação</h3>
-              <p>{formatDate(character.created)}</p>
-            </S.InfoItem>
-            <S.InfoItem>
-              <h3>Última Edição</h3>
-              <p>{formatDate(character.edited)}</p>
-            </S.InfoItem>
-          </S.InfoGrid>
+        <S.CharacterCardWrapper $isLoading={loadingAnimation}>
+          <Card padding={isSmallScreen ? '1rem 0.75rem' : 'clamp(1.25rem, 5vw, 2.5rem)'}>
+            <h1>{character.name}</h1>
+            <S.InfoGrid $isSmallScreen={isSmallScreen}>
+              <S.InfoItem>
+                <h3>Altura</h3>
+                <p>{character.height} cm</p>
+              </S.InfoItem>
+              <S.InfoItem>
+                <h3>Peso</h3>
+                <p>{character.mass} kg</p>
+              </S.InfoItem>
+              <S.InfoItem>
+                <h3>Cor do cabelo</h3>
+                <p>{character.hair_color}</p>
+              </S.InfoItem>
+              <S.InfoItem>
+                <h3>Cor da pele</h3>
+                <p>{character.skin_color}</p>
+              </S.InfoItem>
+              <S.InfoItem>
+                <h3>Cor dos olhos</h3>
+                <p>{character.eye_color}</p>
+              </S.InfoItem>
+              <S.InfoItem>
+                <h3>Nascimento</h3>
+                <p>{character.birth_year}</p>
+              </S.InfoItem>
+              <S.InfoItem>
+                <h3>Gênero</h3>
+                <p>{character.gender}</p>
+              </S.InfoItem>
+              <S.InfoItem $fullWidth={isSmallScreen}>
+                <h3>Planeta Natal</h3>
+                {homeworld ? (
+                  <div>
+                    <p><strong>Nome:</strong> {homeworld.name}</p>
+                    <p><strong>Clima:</strong> {homeworld.climate}</p>
+                    <p><strong>Terreno:</strong> {homeworld.terrain}</p>
+                    <p><strong>População:</strong> {homeworld.population}</p>
+                    <p><strong>Diâmetro:</strong> {homeworld.diameter} km</p>
+                  </div>
+                ) : (
+                  <p>Carregando detalhes...</p>
+                )}
+              </S.InfoItem>
+              <S.InfoItem>
+                <h3>Data de Criação</h3>
+                <p>{formatDate(character.created)}</p>
+              </S.InfoItem>
+              <S.InfoItem>
+                <h3>Última Edição</h3>
+                <p>{formatDate(character.edited)}</p>
+              </S.InfoItem>
+            </S.InfoGrid>
           
-          {character.films.length > 0 && (
-            <S.FilmsList $isSmallScreen={isSmallScreen}>
-              <h2>Filmes</h2>
-              <ul>
-                {character.films.map((filmUrl, index) => {
-                  const film = films[filmUrl];
-                  const isExpanded = hoveredFilm === filmUrl;
-                  return (
-                    <S.FilmItem
-                      key={index}
-                      $expanded={isExpanded}
-                      $isSmallScreen={isSmallScreen}
-                      onMouseEnter={() => handleMouseEnter(filmUrl, setHoveredFilm)}
-                      onMouseLeave={() => handleMouseLeave(setHoveredFilm)}
-                      onClick={(e) => handleItemClick(filmUrl, setHoveredFilm, hoveredFilm, e)}
-                      aria-expanded={isExpanded}
-                    >
-                      <h3>{film ? film.title : `Filme ${index + 1}`}</h3>
-                      {isExpanded && (
-                        <div className="details">
-                          {film ? (
-                            <div>
-                              <p><strong>Episódio:</strong> {film.episode_id}</p>
-                              <p><strong>Diretor:</strong> {film.director}</p>
-                              <p><strong>Produtor:</strong> {film.producer}</p>
-                              <p><strong>Data de lançamento:</strong> {formatDate(film.release_date)}</p>
-                              <p><strong>Texto de abertura:</strong> {film.opening_crawl.substring(0, isSmallScreen ? 70 : 100)}...</p>
-                            </div>
-                          ) : (
-                            <p>Carregando detalhes...</p>
-                          )}
-                        </div>
-                      )}
-                      <S.CloseButton 
-                        className="close-btn"
-                        $isExpanded={isExpanded}
+            {character.films.length > 0 && (
+              <S.FilmsList $isSmallScreen={isSmallScreen}>
+                <h2>Filmes</h2>
+                <ul>
+                  {character.films.map((filmUrl, index) => {
+                    const film = films[filmUrl];
+                    const isExpanded = hoveredFilm === filmUrl;
+                    return (
+                      <S.FilmItem
+                        key={index}
+                        $expanded={isExpanded}
                         $isSmallScreen={isSmallScreen}
-                        onClick={(e) => isExpanded && handleCloseItem(setHoveredFilm, e)}
-                        aria-label="Fechar detalhes"
-                      />
-                    </S.FilmItem>
-                  );
-                })}
-              </ul>
-            </S.FilmsList>
-          )}
+                        onMouseEnter={() => handleMouseEnter(filmUrl, setHoveredFilm)}
+                        onMouseLeave={() => handleMouseLeave(setHoveredFilm)}
+                        onClick={(e) => handleItemClick(filmUrl, setHoveredFilm, hoveredFilm, e)}
+                        aria-expanded={isExpanded}
+                      >
+                        <h3>{film ? film.title : `Filme ${index + 1}`}</h3>
+                        {isExpanded && (
+                          <div className="details">
+                            {film ? (
+                              <div>
+                                <p><strong>Episódio:</strong> {film.episode_id}</p>
+                                <p><strong>Diretor:</strong> {film.director}</p>
+                                <p><strong>Produtor:</strong> {film.producer}</p>
+                                <p><strong>Data de lançamento:</strong> {formatDate(film.release_date)}</p>
+                                <p><strong>Texto de abertura:</strong> {film.opening_crawl.substring(0, isSmallScreen ? 70 : 100)}...</p>
+                              </div>
+                            ) : (
+                              <p>Carregando detalhes...</p>
+                            )}
+                          </div>
+                        )}
+                        <S.CloseButton 
+                          className="close-btn"
+                          $isExpanded={isExpanded}
+                          $isSmallScreen={isSmallScreen}
+                          onClick={(e) => isExpanded && handleCloseItem(setHoveredFilm, e)}
+                          aria-label="Fechar detalhes"
+                        />
+                      </S.FilmItem>
+                    );
+                  })}
+                </ul>
+              </S.FilmsList>
+            )}
           
-          {character.species.length > 0 && (
-            <S.FilmsList $isSmallScreen={isSmallScreen}>
-              <h2>Espécies</h2>
-              <ul>
-                {character.species.map((speciesUrl, index) => {
-                  const speciesItem = species[speciesUrl];
-                  const isExpanded = hoveredSpecies === speciesUrl;
-                  return (
-                    <S.FilmItem
-                      key={index}
-                      $expanded={isExpanded}
-                      $isSmallScreen={isSmallScreen}
-                      onMouseEnter={() => handleMouseEnter(speciesUrl, setHoveredSpecies)}
-                      onMouseLeave={() => handleMouseLeave(setHoveredSpecies)}
-                      onClick={(e) => handleItemClick(speciesUrl, setHoveredSpecies, hoveredSpecies, e)}
-                      aria-expanded={isExpanded}
-                    >
-                      <h3>{speciesItem ? speciesItem.name : `Espécie ${index + 1}`}</h3>
-                      {isExpanded && (
-                        <div className="details">
-                          {speciesItem ? (
-                            <div>
-                              <p><strong>Classificação:</strong> {speciesItem.classification}</p>
-                              <p><strong>Designação:</strong> {speciesItem.designation}</p>
-                              <p><strong>Altura média:</strong> {speciesItem.average_height} cm</p>
-                              <p><strong>Vida média:</strong> {speciesItem.average_lifespan} anos</p>
-                              <p><strong>Linguagem:</strong> {speciesItem.language}</p>
-                            </div>
-                          ) : (
-                            <p>Carregando detalhes...</p>
-                          )}
-                        </div>
-                      )}
-                      <S.CloseButton 
-                        className="close-btn"
-                        $isExpanded={isExpanded}
+            {character.species.length > 0 && (
+              <S.FilmsList $isSmallScreen={isSmallScreen}>
+                <h2>Espécies</h2>
+                <ul>
+                  {character.species.map((speciesUrl, index) => {
+                    const speciesItem = species[speciesUrl];
+                    const isExpanded = hoveredSpecies === speciesUrl;
+                    return (
+                      <S.FilmItem
+                        key={index}
+                        $expanded={isExpanded}
                         $isSmallScreen={isSmallScreen}
-                        onClick={(e) => isExpanded && handleCloseItem(setHoveredSpecies, e)}
-                        aria-label="Fechar detalhes"
-                      />
-                    </S.FilmItem>
-                  );
-                })}
-              </ul>
-            </S.FilmsList>
-          )}
+                        onMouseEnter={() => handleMouseEnter(speciesUrl, setHoveredSpecies)}
+                        onMouseLeave={() => handleMouseLeave(setHoveredSpecies)}
+                        onClick={(e) => handleItemClick(speciesUrl, setHoveredSpecies, hoveredSpecies, e)}
+                        aria-expanded={isExpanded}
+                      >
+                        <h3>{speciesItem ? speciesItem.name : `Espécie ${index + 1}`}</h3>
+                        {isExpanded && (
+                          <div className="details">
+                            {speciesItem ? (
+                              <div>
+                                <p><strong>Classificação:</strong> {speciesItem.classification}</p>
+                                <p><strong>Designação:</strong> {speciesItem.designation}</p>
+                                <p><strong>Altura média:</strong> {speciesItem.average_height} cm</p>
+                                <p><strong>Vida média:</strong> {speciesItem.average_lifespan} anos</p>
+                                <p><strong>Linguagem:</strong> {speciesItem.language}</p>
+                              </div>
+                            ) : (
+                              <p>Carregando detalhes...</p>
+                            )}
+                          </div>
+                        )}
+                        <S.CloseButton 
+                          className="close-btn"
+                          $isExpanded={isExpanded}
+                          $isSmallScreen={isSmallScreen}
+                          onClick={(e) => isExpanded && handleCloseItem(setHoveredSpecies, e)}
+                          aria-label="Fechar detalhes"
+                        />
+                      </S.FilmItem>
+                    );
+                  })}
+                </ul>
+              </S.FilmsList>
+            )}
           
-          {character.vehicles.length > 0 && (
-            <S.FilmsList $isSmallScreen={isSmallScreen}>
-              <h2>Veículos</h2>
-              <ul>
-                {character.vehicles.map((vehicleUrl, index) => {
-                  const vehicle = vehicles[vehicleUrl];
-                  const isExpanded = hoveredVehicle === vehicleUrl;
-                  return (
-                    <S.FilmItem
-                      key={index}
-                      $expanded={isExpanded}
-                      $isSmallScreen={isSmallScreen}
-                      onMouseEnter={() => handleMouseEnter(vehicleUrl, setHoveredVehicle)}
-                      onMouseLeave={() => handleMouseLeave(setHoveredVehicle)}
-                      onClick={(e) => handleItemClick(vehicleUrl, setHoveredVehicle, hoveredVehicle, e)}
-                      aria-expanded={isExpanded}
-                    >
-                      <h3>{vehicle ? vehicle.name : `Veículo ${index + 1}`}</h3>
-                      {isExpanded && (
-                        <div className="details">
-                          {vehicle ? (
-                            <div>
-                              <p><strong>Modelo:</strong> {vehicle.model}</p>
-                              <p><strong>Fabricante:</strong> {vehicle.manufacturer}</p>
-                              <p><strong>Classe:</strong> {vehicle.vehicle_class}</p>
-                              <p><strong>Comprimento:</strong> {vehicle.length} m</p>
-                              <p><strong>Velocidade máxima:</strong> {vehicle.max_atmosphering_speed}</p>
-                              <p><strong>Capacidade de carga:</strong> {vehicle.cargo_capacity}</p>
-                            </div>
-                          ) : (
-                            <p>Carregando detalhes...</p>
-                          )}
-                        </div>
-                      )}
-                      <S.CloseButton 
-                        className="close-btn"
-                        $isExpanded={isExpanded}
+            {character.vehicles.length > 0 && (
+              <S.FilmsList $isSmallScreen={isSmallScreen}>
+                <h2>Veículos</h2>
+                <ul>
+                  {character.vehicles.map((vehicleUrl, index) => {
+                    const vehicle = vehicles[vehicleUrl];
+                    const isExpanded = hoveredVehicle === vehicleUrl;
+                    return (
+                      <S.FilmItem
+                        key={index}
+                        $expanded={isExpanded}
                         $isSmallScreen={isSmallScreen}
-                        onClick={(e) => isExpanded && handleCloseItem(setHoveredVehicle, e)}
-                        aria-label="Fechar detalhes"
-                      />
-                    </S.FilmItem>
-                  );
-                })}
-              </ul>
-            </S.FilmsList>
-          )}
+                        onMouseEnter={() => handleMouseEnter(vehicleUrl, setHoveredVehicle)}
+                        onMouseLeave={() => handleMouseLeave(setHoveredVehicle)}
+                        onClick={(e) => handleItemClick(vehicleUrl, setHoveredVehicle, hoveredVehicle, e)}
+                        aria-expanded={isExpanded}
+                      >
+                        <h3>{vehicle ? vehicle.name : `Veículo ${index + 1}`}</h3>
+                        {isExpanded && (
+                          <div className="details">
+                            {vehicle ? (
+                              <div>
+                                <p><strong>Modelo:</strong> {vehicle.model}</p>
+                                <p><strong>Fabricante:</strong> {vehicle.manufacturer}</p>
+                                <p><strong>Classe:</strong> {vehicle.vehicle_class}</p>
+                                <p><strong>Comprimento:</strong> {vehicle.length} m</p>
+                                <p><strong>Velocidade máxima:</strong> {vehicle.max_atmosphering_speed}</p>
+                                <p><strong>Capacidade de carga:</strong> {vehicle.cargo_capacity}</p>
+                              </div>
+                            ) : (
+                              <p>Carregando detalhes...</p>
+                            )}
+                          </div>
+                        )}
+                        <S.CloseButton 
+                          className="close-btn"
+                          $isExpanded={isExpanded}
+                          $isSmallScreen={isSmallScreen}
+                          onClick={(e) => isExpanded && handleCloseItem(setHoveredVehicle, e)}
+                          aria-label="Fechar detalhes"
+                        />
+                      </S.FilmItem>
+                    );
+                  })}
+                </ul>
+              </S.FilmsList>
+            )}
           
-          {character.starships.length > 0 && (
-            <S.FilmsList $isSmallScreen={isSmallScreen}>
-              <h2>Naves</h2>
-              <ul>
-                {character.starships.map((starshipUrl, index) => {
-                  const starship = starships[starshipUrl];
-                  const isExpanded = hoveredStarship === starshipUrl;
-                  return (
-                    <S.FilmItem
-                      key={index}
-                      $expanded={isExpanded}
-                      $isSmallScreen={isSmallScreen}
-                      onMouseEnter={() => handleMouseEnter(starshipUrl, setHoveredStarship)}
-                      onMouseLeave={() => handleMouseLeave(setHoveredStarship)}
-                      onClick={(e) => handleItemClick(starshipUrl, setHoveredStarship, hoveredStarship, e)}
-                      aria-expanded={isExpanded}
-                    >
-                      <h3>{starship ? starship.name : `Nave ${index + 1}`}</h3>
-                      {isExpanded && (
-                        <div className="details">
-                          {starship ? (
-                            <div>
-                              <p><strong>Modelo:</strong> {starship.model}</p>
-                              <p><strong>Fabricante:</strong> {starship.manufacturer}</p>
-                              <p><strong>Classe:</strong> {starship.starship_class}</p>
-                              <p><strong>Comprimento:</strong> {starship.length} m</p>
-                              <p><strong>Velocidade máxima:</strong> {starship.max_atmosphering_speed}</p>
-                              <p><strong>Hyperdrive:</strong> {starship.hyperdrive_rating}</p>
-                            </div>
-                          ) : (
-                            <p>Carregando detalhes...</p>
-                          )}
-                        </div>
-                      )}
-                      <S.CloseButton 
-                        className="close-btn"
-                        $isExpanded={isExpanded}
+            {character.starships.length > 0 && (
+              <S.FilmsList $isSmallScreen={isSmallScreen}>
+                <h2>Naves</h2>
+                <ul>
+                  {character.starships.map((starshipUrl, index) => {
+                    const starship = starships[starshipUrl];
+                    const isExpanded = hoveredStarship === starshipUrl;
+                    return (
+                      <S.FilmItem
+                        key={index}
+                        $expanded={isExpanded}
                         $isSmallScreen={isSmallScreen}
-                        onClick={(e) => isExpanded && handleCloseItem(setHoveredStarship, e)}
-                        aria-label="Fechar detalhes"
-                      />
-                    </S.FilmItem>
-                  );
-                })}
-              </ul>
-            </S.FilmsList>
-          )}
+                        onMouseEnter={() => handleMouseEnter(starshipUrl, setHoveredStarship)}
+                        onMouseLeave={() => handleMouseLeave(setHoveredStarship)}
+                        onClick={(e) => handleItemClick(starshipUrl, setHoveredStarship, hoveredStarship, e)}
+                        aria-expanded={isExpanded}
+                      >
+                        <h3>{starship ? starship.name : `Nave ${index + 1}`}</h3>
+                        {isExpanded && (
+                          <div className="details">
+                            {starship ? (
+                              <div>
+                                <p><strong>Modelo:</strong> {starship.model}</p>
+                                <p><strong>Fabricante:</strong> {starship.manufacturer}</p>
+                                <p><strong>Classe:</strong> {starship.starship_class}</p>
+                                <p><strong>Comprimento:</strong> {starship.length} m</p>
+                                <p><strong>Velocidade máxima:</strong> {starship.max_atmosphering_speed}</p>
+                                <p><strong>Hyperdrive:</strong> {starship.hyperdrive_rating}</p>
+                              </div>
+                            ) : (
+                              <p>Carregando detalhes...</p>
+                            )}
+                          </div>
+                        )}
+                        <S.CloseButton 
+                          className="close-btn"
+                          $isExpanded={isExpanded}
+                          $isSmallScreen={isSmallScreen}
+                          onClick={(e) => isExpanded && handleCloseItem(setHoveredStarship, e)}
+                          aria-label="Fechar detalhes"
+                        />
+                      </S.FilmItem>
+                    );
+                  })}
+                </ul>
+              </S.FilmsList>
+            )}
           
-          <S.InfoItem style={{ marginTop: '1.5rem' }}>
-            <h3>URL na API</h3>
-            <p style={{ fontSize: '0.9rem', wordBreak: 'break-all' }}>{character.url}</p>
-          </S.InfoItem>
-        </Card>
+            <S.InfoItem style={{ marginTop: '1.5rem' }}>
+              <h3>URL na API</h3>
+              <p style={{ fontSize: '0.9rem', wordBreak: 'break-all' }}>{character.url}</p>
+            </S.InfoItem>
+          </Card>
+        </S.CharacterCardWrapper>
       ) : (
         <p>Personagem não encontrado.</p>
       )}

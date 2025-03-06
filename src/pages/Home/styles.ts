@@ -1,11 +1,51 @@
-// src/pages/Home/styles.ts
-import styled from 'styled-components';
+import styled, { keyframes, css } from 'styled-components';
 import { Card } from '../../components/ui/Card';
 
-export const CharacterCard = styled(Card)`
+const fadeIn = keyframes`
+  from { opacity: 0; }
+  to { opacity: 1; }
+`;
+
+export const ContentWrapper = styled.div<{ $isLoading: boolean }>`
+  position: relative;
+  min-height: 400px;
+  transition: all 0.3s ease;
+  
+  ${props => props.$isLoading && css`
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255, 255, 255, 0.05);
+      pointer-events: none;
+      z-index: 1;
+    }
+  `}
+`;
+
+export const OverlayLoader = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(3px);
+  z-index: 5;
+  animation: ${fadeIn} 0.3s ease;
+  border-radius: var(--border-radius);
+`;
+
+export const CharacterCard = styled(Card)<{ $dimmed?: boolean }>`
   position: relative;
   transition: all 0.3s ease;
-  overflow: hidden;
+  opacity: ${props => props.$dimmed ? 0.7 : 1};
   
   &:hover {
     transform: translateY(-8px);
@@ -145,4 +185,5 @@ export const Pagination = styled.div`
   align-items: center;
   gap: 1rem;
   margin-top: 2rem;
+  padding: 1.5rem 0;
 `;

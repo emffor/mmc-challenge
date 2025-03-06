@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled, { keyframes, css } from 'styled-components';
 
 const breakpoints = {
   smallMobile: '380px',
@@ -7,6 +7,52 @@ const breakpoints = {
   laptop: '1024px'
 };
 
+const fadeIn = keyframes`
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+`;
+
+const shimmer = keyframes`
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+`;
+
+export const LoaderWrapper = styled.div`
+  min-height: 400px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+`;
+
+export const CharacterCardWrapper = styled.div<{ $isLoading: boolean }>`
+  transition: all 0.5s ease;
+  opacity: ${props => props.$isLoading ? 0.7 : 1};
+  transform: ${props => props.$isLoading ? 'translateY(10px)' : 'translateY(0)'};
+  
+  ${props => props.$isLoading && css`
+    position: relative;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(90deg, 
+        rgba(255, 255, 255, 0.1) 25%, 
+        rgba(255, 255, 255, 0.2) 50%, 
+        rgba(255, 255, 255, 0.1) 75%);
+      background-size: 200% 100%;
+      animation: ${shimmer} 1.5s infinite;
+      z-index: 1;
+      pointer-events: none;
+      border-radius: var(--border-radius);
+    }
+  `}
+`;
+
 export const InfoGrid = styled.div<{ $isSmallScreen?: boolean }>`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr));
@@ -14,6 +60,8 @@ export const InfoGrid = styled.div<{ $isSmallScreen?: boolean }>`
   margin-top: clamp(1.5rem, 5vw, 2rem);
   margin-bottom: clamp(2rem, 6vw, 3rem);
   position: relative;
+  animation: ${fadeIn} 0.5s ease;
+  
   &::after {
     content: '';
     position: absolute;
@@ -23,13 +71,16 @@ export const InfoGrid = styled.div<{ $isSmallScreen?: boolean }>`
     height: 1px;
     background: linear-gradient(90deg, transparent, rgba(0,0,0,0.05), transparent);
   }
+  
   @media (max-width: ${breakpoints.tablet}) {
     grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr));
   }
+  
   @media (max-width: ${breakpoints.mobile}) {
     grid-template-columns: 1fr 1fr;
     gap: 0.75rem;
   }
+  
   @media (max-width: ${breakpoints.smallMobile}) {
     grid-template-columns: 1fr;
     gap: 0.5rem;
@@ -42,21 +93,26 @@ export const InfoItem = styled.div<{ $fullWidth?: boolean }>`
   border-radius: 12px;
   transition: all 0.3s ease;
   grid-column: ${props => props.$fullWidth ? '1 / -1' : 'auto'};
+  animation: ${fadeIn} 0.5s ease;
+  
   @media (hover: hover) {
     &:hover {
       background: rgba(249, 249, 249, 0.5);
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
       transform: translateY(-3px);
     }
+    
     &:hover h3::after {
       width: 40px;
     }
   }
+  
   @media (hover: none) {
     &:active {
       background: rgba(249, 249, 249, 0.5);
     }
   }
+  
   h3 {
     font-size: clamp(0.75rem, 3vw, 0.9rem);
     color: var(--text-secondary);
@@ -65,6 +121,7 @@ export const InfoItem = styled.div<{ $fullWidth?: boolean }>`
     letter-spacing: 0.5px;
     position: relative;
     display: inline-block;
+    
     &::after {
       content: '';
       position: absolute;
@@ -77,21 +134,26 @@ export const InfoItem = styled.div<{ $fullWidth?: boolean }>`
       border-radius: 2px;
     }
   }
+  
   p {
     font-size: clamp(0.9rem, 3.5vw, 1.1rem);
     color: var(--text-primary);
     font-weight: 500;
     word-break: break-word;
   }
+  
   strong {
     font-weight: 600;
     color: var(--text-primary);
   }
+  
   @media (max-width: ${breakpoints.smallMobile}) {
     padding: 0.6rem;
+    
     h3 {
       font-size: 0.75rem;
     }
+    
     p {
       font-size: 0.85rem;
     }
@@ -100,12 +162,15 @@ export const InfoItem = styled.div<{ $fullWidth?: boolean }>`
 
 export const FilmsList = styled.div<{ $isSmallScreen?: boolean }>`
   margin: ${props => props.$isSmallScreen ? '1.25rem 0' : 'clamp(1.75rem, 6vw, 2.5rem) 0'};
+  animation: ${fadeIn} 0.5s ease;
+  
   h2 {
     font-size: clamp(1.25rem, 5vw, 1.5rem);
     margin-bottom: clamp(1.25rem, 5vw, 1.5rem);
     color: var(--text-primary);
     position: relative;
     display: inline-block;
+    
     &::after {
       content: '';
       position: absolute;
@@ -117,14 +182,17 @@ export const FilmsList = styled.div<{ $isSmallScreen?: boolean }>`
       border-radius: 4px;
     }
   }
+  
   ul {
     list-style: none;
     display: flex;
     flex-direction: column;
     gap: ${props => props.$isSmallScreen ? '0.5rem' : 'clamp(0.75rem, 3vw, 1rem)'};
   }
+  
   @media (max-width: ${breakpoints.smallMobile}) {
     margin: 1rem 0;
+    
     h2 {
       font-size: 1.1rem;
       margin-bottom: 1rem;
@@ -144,6 +212,8 @@ export const FilmItem = styled.li<{ $expanded: boolean; $isSmallScreen?: boolean
   touch-action: manipulation;
   background: ${props => props.$expanded ? 'linear-gradient(135deg, #f6f9fc 0%, #eef2f7 100%)' : 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)'};
   border: 1px solid ${props => props.$expanded ? 'transparent' : '#e0e0e0'};
+  animation: ${fadeIn} 0.5s ease;
+  
   &::before {
     content: '';
     position: absolute;
@@ -160,13 +230,17 @@ export const FilmItem = styled.li<{ $expanded: boolean; $isSmallScreen?: boolean
     opacity: ${props => props.$expanded ? 1 : 0};
     transition: opacity 0.4s ease;
   }
+  
   @media (hover: hover) {
     transform: ${props => props.$expanded ? 'translateY(-5px) scale(1.02)' : 'translateY(0) scale(1)'};
   }
+  
   @media (hover: none) {
     transform: ${props => props.$expanded ? 'translateY(-2px)' : 'translateY(0)'};
   }
+  
   box-shadow: ${props => props.$expanded ? '0 15px 30px rgba(0, 0, 0, 0.1), 0 5px 15px rgba(0, 0, 0, 0.05)' : '0 2px 5px rgba(0, 0, 0, 0.05)'};
+  
   h3 {
     position: relative;
     font-size: ${props => props.$isSmallScreen ? '0.9rem' : 'clamp(1rem, 4vw, 1.2rem)'};
@@ -175,6 +249,7 @@ export const FilmItem = styled.li<{ $expanded: boolean; $isSmallScreen?: boolean
     transition: all 0.4s ease;
     color: var(--text-primary);
     padding-right: 30px;
+    
     &::after {
       content: '';
       position: absolute;
@@ -187,38 +262,47 @@ export const FilmItem = styled.li<{ $expanded: boolean; $isSmallScreen?: boolean
       border-radius: 3px;
     }
   }
+  
   .details {
     animation: slideUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    
     p {
       margin-bottom: ${props => props.$isSmallScreen ? '0.3rem' : 'clamp(0.4rem, 2vw, 0.5rem)'};
       font-size: ${props => props.$isSmallScreen ? '0.8rem' : 'clamp(0.85rem, 3.5vw, 0.95rem)'};
       line-height: 1.6;
       color: var(--text-secondary);
+      
       strong {
         color: var(--text-primary);
         font-weight: 600;
       }
     }
   }
+  
   @keyframes slideUp {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
   }
+  
   @media (max-width: ${breakpoints.mobile}) {
     padding: ${props => props.$expanded ? '1.25rem 1rem' : '0.8rem'};
+    
     .details {
       p {
         font-size: 0.85rem;
       }
     }
   }
+  
   @media (max-width: ${breakpoints.smallMobile}) {
     padding: ${props => props.$expanded ? '0.9rem 0.7rem' : '0.6rem 0.5rem'};
     border-radius: 8px;
+    
     h3 {
       font-size: 0.9rem;
       padding-right: 24px;
     }
+    
     .details {
       p {
         font-size: 0.8rem;
@@ -226,10 +310,12 @@ export const FilmItem = styled.li<{ $expanded: boolean; $isSmallScreen?: boolean
       }
     }
   }
+  
   @media (hover: none) {
     &:active {
       opacity: 0.9;
     }
+    
     ${props => props.$expanded && `
       transform: translateY(-2px);
     `}
@@ -257,9 +343,11 @@ export const CloseButton = styled.button<{ $isExpanded: boolean; $isSmallScreen?
   opacity: ${props => props.$isExpanded ? 1 : 0.8};
   cursor: pointer;
   z-index: 5;
+  
   &::before {
     content: '+';
   }
+  
   @media (hover: hover) {
     &:hover {
       opacity: 1;
@@ -267,9 +355,11 @@ export const CloseButton = styled.button<{ $isExpanded: boolean; $isSmallScreen?
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
     }
   }
+  
   @media (hover: none) {
     width: ${props => props.$isExpanded ? '32px' : '28px'};
     height: ${props => props.$isExpanded ? '32px' : '28px'};
+    
     &:active {
       transform: ${props => props.$isExpanded ? 'rotate(45deg) scale(0.9)' : 'rotate(0) scale(0.9)'};
       opacity: 0.8;

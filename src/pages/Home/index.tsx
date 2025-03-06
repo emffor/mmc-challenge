@@ -15,9 +15,10 @@ const isValidValue = (value: string): boolean => {
 const Home = () => {
   const navigate = useNavigate();
   const [characters, setCharacters] = useState<Character[]>([]);
-  const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [isPaginationLoading, setIsPaginationLoading] = useState(false);
 
   useEffect(() => {
     const user = localStorage.getItem('user');
@@ -25,19 +26,28 @@ const Home = () => {
       navigate('/login');
       return;
     }
-    fetchCharacters();
+    
+    if (isInitialLoading) {
+      fetchCharacters(true);
+    } else {
+      setIsPaginationLoading(true);
+      fetchCharacters(false);
+    }
   }, [page, navigate]);
 
-  const fetchCharacters = async () => {
+  const fetchCharacters = async (isInitial: boolean) => {
     try {
-      setLoading(true);
       const data = await getCharacters(page);
       setCharacters(data.results);
       setTotalPages(Math.ceil(data.count / 10));
     } catch (error) {
       console.error('Erro ao buscar personagens:', error);
     } finally {
-      setLoading(false);
+      if (isInitial) {
+        setIsInitialLoading(false);
+      } else {
+        setIsPaginationLoading(false);
+      }
     }
   };
 
@@ -69,6 +79,10 @@ const Home = () => {
     return filmId;
   };
 
+  if (isInitialLoading) {
+    return <Loader fullPage text="Carregando personagens..." />;
+  }
+
   return (
     <Container>
       <header
@@ -83,15 +97,20 @@ const Home = () => {
         <Button onClick={handleLogout}>Sair</Button>
       </header>
 
-      {loading ? (
-        <Loader />
-      ) : (
+      <S.ContentWrapper $isLoading={isPaginationLoading}>
+        {isPaginationLoading && (
+          <S.OverlayLoader>
+            <Loader size="35px" centered={false} />
+          </S.OverlayLoader>
+        )}
+        
         <Grid>
           {characters.map((char, idx) => (
             <S.CharacterCard
               key={idx}
               onClick={() => navigate(`/character/${getCharacterId(char.url)}`)}
               hoverable={true}
+              $dimmed={isPaginationLoading}
             >
               <S.CardHeader>
                 <S.CharacterName>{char.name}</S.CharacterName>
@@ -156,11 +175,11 @@ const Home = () => {
             </S.CharacterCard>
           ))}
         </Grid>
-      )}
+      </S.ContentWrapper>
 
       <S.Pagination>
         <Button
-          disabled={page === 1 || loading}
+          disabled={page === 1 || isPaginationLoading}
           onClick={() => setPage((p) => p - 1)}
           variant="outline"
         >
@@ -168,7 +187,7 @@ const Home = () => {
         </Button>
         <span>Página {page} de {totalPages}</span>
         <Button
-          disabled={page === totalPages || loading}
+          disabled={page === totalPages || isPaginationLoading}
           onClick={() => setPage((p) => p + 1)}
         >
           Próxima
