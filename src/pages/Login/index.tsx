@@ -47,7 +47,7 @@ const Login = () => {
         </div>
 
         <S.LogoArea>
-          <S.LogoImage>SW</S.LogoImage>
+          <S.LogoImage>MMC</S.LogoImage>
           <S.LogoText>Star Wars Explorer</S.LogoText>
         </S.LogoArea>
         

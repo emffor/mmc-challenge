@@ -14,6 +14,9 @@ export const GlobalStyle = createGlobalStyle`
     --border-radius: 8px;
     --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     --transition: all 0.3s ease;
+    --container-padding-mobile: 0.75rem;
+    --container-padding-tablet: 1.25rem;
+    --container-padding-desktop: 2rem;
   }
 
   [data-theme='dark'] {
@@ -35,12 +38,25 @@ export const GlobalStyle = createGlobalStyle`
     box-sizing: border-box;
   }
   
+  html {
+    font-size: 16px;
+    
+    @media (max-width: 768px) {
+      font-size: 15px;
+    }
+    
+    @media (max-width: 480px) {
+      font-size: 14px;
+    }
+  }
+  
   body {
     font-family: 'Inter', 'Roboto', sans-serif;
     background: var(--bg-primary);
     color: var(--text-primary);
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
   }
   
   button {
@@ -51,7 +67,51 @@ export const GlobalStyle = createGlobalStyle`
   #root {
     max-width: 1280px;
     margin: 0 auto;
-    padding: 1rem;
     width: 100%;
+    padding: var(--container-padding-desktop);
+    
+    @media (max-width: 768px) {
+      padding: var(--container-padding-tablet);
+    }
+    
+    @media (max-width: 480px) {
+      padding: var(--container-padding-mobile);
+    }
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    hyphens: auto;
+  }
+  
+  img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+  
+  a:focus, button:focus, input:focus, select:focus, textarea:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: var(--text-secondary);
+    border-radius: 3px;
+    opacity: 0.5;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--accent);
   }
 `;
