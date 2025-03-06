@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getCharacters } from '../../services/api';
-import { Character } from './types';
+import { fetchCharacters, setPage } from '../../store/charactersSlice';
+import { logout } from '../../store/authSlice';
 import { Container } from '../../components/layout/Container';
 import { Button } from '../../components/ui/Button';
 import { Loader } from '../../components/feedback/Loader';
 import { Grid } from '../../components/layout/Grid';
 import * as S from './styles';
 import { ThemeToggle } from '../../components/ui/ThemeToggle';
+import { useAppDispatch, useAppSelector } from '../../hook/useTypedRedux';
 
 const isValidValue = (value: string): boolean => {
   return !!value && !['unknown', 'n/a', 'none', 'undefined', 'null'].includes(value.toLowerCase());
@@ -15,12 +16,17 @@ const isValidValue = (value: string): boolean => {
 
 const Home = () => {
   const navigate = useNavigate();
-  const [characters, setCharacters] = useState<Character[]>([]);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [isInitialLoading, setIsInitialLoading] = useState(true);
-  const [isPaginationLoading, setIsPaginationLoading] = useState(false);
+  const dispatch = useAppDispatch();
+  const { data: characters, totalPages, currentPage, loading, paginationLoading, error } = 
+    useAppSelector(state => state.characters);
+  const { isAuthenticated } = useAppSelector(state => state.auth);
   const [isMobile, setIsMobile] = useState(false);
+  
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/login');
+    }
+  }, [isAuthenticated, navigate]);
   
   useEffect(() => {
     const checkMobile = () => {
@@ -36,35 +42,8 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
-    const user = localStorage.getItem('user');
-    if (!user) {
-      navigate('/login');
-      return;
-    }
-    
-    if (isInitialLoading) {
-      fetchCharacters(true);
-    } else {
-      setIsPaginationLoading(true);
-      fetchCharacters(false);
-    }
-  }, [page, navigate]);
-
-  const fetchCharacters = async (isInitial: boolean) => {
-    try {
-      const data = await getCharacters(page);
-      setCharacters(data.results);
-      setTotalPages(Math.ceil(data.count / 10));
-    } catch (error) {
-      console.error('Erro ao buscar personagens:', error);
-    } finally {
-      if (isInitial) {
-        setIsInitialLoading(false);
-      } else {
-        setIsPaginationLoading(false);
-      }
-    }
-  };
+    dispatch(fetchCharacters(currentPage));
+  }, [currentPage, dispatch]);
 
   const getCharacterId = (url: string) => {
     const matches = url.match(/\/people\/(\d+)/);
@@ -72,7 +51,7 @@ const Home = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('user');
+    dispatch(logout());
     navigate('/login');
   };
 
@@ -94,8 +73,19 @@ const Home = () => {
     return filmId;
   };
 
-  if (isInitialLoading) {
+  if (loading) {
     return <Loader fullPage text="Carregando personagens..." />;
+  }
+  
+  if (error) {
+    return (
+      <Container>
+        <p>Erro ao carregar dados: {error}</p>
+        <Button onClick={() => dispatch(fetchCharacters(currentPage))}>
+          Tentar novamente
+        </Button>
+      </Container>
+    );
   }
 
   return (
@@ -117,8 +107,8 @@ const Home = () => {
         </div>
       </header>
 
-      <S.ContentWrapper $isLoading={isPaginationLoading}>
-        {isPaginationLoading && (
+      <S.ContentWrapper $isLoading={paginationLoading}>
+        {paginationLoading && (
           <S.OverlayLoader>
             <Loader size="35px" centered={false} />
           </S.OverlayLoader>
@@ -130,7 +120,7 @@ const Home = () => {
               key={idx}
               onClick={() => navigate(`/character/${getCharacterId(char.url)}`)}
               hoverable={true}
-              $dimmed={isPaginationLoading}
+              $dimmed={paginationLoading}
             >
               <S.CardHeader>
                 <S.CharacterName>{char.name}</S.CharacterName>
@@ -199,16 +189,16 @@ const Home = () => {
 
       <S.Pagination>
         <Button
-          disabled={page === 1 || isPaginationLoading}
-          onClick={() => setPage((p) => p - 1)}
+          disabled={currentPage === 1 || paginationLoading}
+          onClick={() => dispatch(setPage(currentPage - 1))}
           variant="outline"
         >
           Anterior
         </Button>
-        <span>Página {page} de {totalPages}</span>
+        <span>Página {currentPage} de {totalPages}</span>
         <Button
-          disabled={page === totalPages || isPaginationLoading}
-          onClick={() => setPage((p) => p + 1)}
+          disabled={currentPage === totalPages || paginationLoading}
+          onClick={() => dispatch(setPage(currentPage + 1))}
         >
           Próxima
         </Button>

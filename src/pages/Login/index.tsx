@@ -6,9 +6,14 @@ import { Loader } from '../../components/feedback/Loader';
 import { LoginFormData } from './types';
 import * as S from '../../styles/authStyles';
 import { ThemeToggle } from '../../components/ui/ThemeToggle';
+import { useAppDispatch, useAppSelector } from '../../hook/useTypedRedux';
+import { login } from '../../store/authSlice';
 
 const Login = () => {
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const { isAuthenticated } = useAppSelector(state => state.auth);
+  
   const [formData, setFormData] = useState<LoginFormData>({
     email: '',
     password: ''
@@ -17,8 +22,11 @@ const Login = () => {
   const [animation, setAnimation] = useState(false);
 
   useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/home');
+    }
     setAnimation(true);
-  }, []);
+  }, [isAuthenticated, navigate]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -31,7 +39,7 @@ const Login = () => {
     
     setTimeout(() => {
       if (formData.email && formData.password) {
-        localStorage.setItem('user', JSON.stringify({ email: formData.email }));
+        dispatch(login({ email: formData.email }));
         navigate('/home');
       }
       setLoading(false);
