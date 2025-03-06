@@ -39,7 +39,7 @@ const charactersSlice = createSlice({
   extraReducers: (builder) => {
     builder
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      .addCase(fetchCharacters.pending, (state, action) => {
+      .addCase(fetchCharacters.pending, (state, _action) => {
         if (state.loading) {
           state.loading = true;
         } else {

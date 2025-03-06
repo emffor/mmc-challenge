@@ -128,7 +128,7 @@ const characterDetailSlice = createSlice({
   initialState,
   reducers: {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    clearCharacterDetail: (state) => {
+    clearCharacterDetail: (_state) => {
       return initialState;
     }
   },
