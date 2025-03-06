@@ -119,8 +119,8 @@ const CharacterDetail = () => {
   const [hoveredSpecies, setHoveredSpecies] = useState<string | null>(null);
   const [hoveredVehicle, setHoveredVehicle] = useState<string | null>(null);
   const [hoveredStarship, setHoveredStarship] = useState<string | null>(null);
-  const touchTimer = useRef<NodeJS.Timeout | null>(null);
-  const hoverTimer = useRef<NodeJS.Timeout | null>(null);
+  const touchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hoverDelayTime = 300;
   const [isMobile, setIsMobile] = useState(false);
   const [isSmallScreen, setIsSmallScreen] = useState(false);
@@ -210,7 +210,7 @@ const CharacterDetail = () => {
       if (data.starships.length > 0) {
         fetchPromises.push(
           Promise.all(
-            data.starships.map(async (starshipUrl) => {
+            data.starships.map(async (starshipUrl: string) => {
               const starshipId = starshipUrl.split('/').filter(Boolean).pop();
               if (starshipId) {
                 try {
@@ -237,7 +237,7 @@ const CharacterDetail = () => {
       if (data.vehicles.length > 0) {
         fetchPromises.push(
           Promise.all(
-            data.vehicles.map(async (vehicleUrl) => {
+            data.vehicles.map(async (vehicleUrl: string) => {
               const vehicleId = vehicleUrl.split('/').filter(Boolean).pop();
               if (vehicleId) {
                 try {
@@ -264,7 +264,7 @@ const CharacterDetail = () => {
       if (data.species.length > 0) {
         fetchPromises.push(
           Promise.all(
-            data.species.map(async (speciesUrl) => {
+            data.species.map(async (speciesUrl: string) => {
               const speciesId = speciesUrl.split('/').filter(Boolean).pop();
               if (speciesId) {
                 try {
@@ -291,7 +291,7 @@ const CharacterDetail = () => {
       if (data.films.length > 0) {
         fetchPromises.push(
           Promise.all(
-            data.films.map(async (filmUrl) => {
+            data.films.map(async (filmUrl: string) => {
               const filmId = filmUrl.split('/').filter(Boolean).pop();
               if (filmId) {
                 try {
@@ -341,6 +341,7 @@ const CharacterDetail = () => {
   const formatDate = (dateString: string) => {
     try {
       return new Date(dateString).toLocaleDateString('pt-BR');
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e) {
       return dateString;
     }
