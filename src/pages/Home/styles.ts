@@ -47,8 +47,20 @@ export const CharacterCard = styled(Card)<{ $dimmed?: boolean }>`
   transition: all 0.3s ease;
   opacity: ${props => props.$dimmed ? 0.7 : 1};
   
-  &:hover {
-    transform: translateY(-8px);
+  @media (hover: hover) {
+    &:hover {
+      transform: translateY(-8px);
+    }
+    
+    &:hover:before {
+      opacity: 1;
+    }
+  }
+  
+  @media (hover: none) {
+    &:active {
+      transform: translateY(-4px);
+    }
   }
   
   &:before {
@@ -62,10 +74,6 @@ export const CharacterCard = styled(Card)<{ $dimmed?: boolean }>`
     opacity: 0;
     transition: opacity 0.3s ease;
   }
-  
-  &:hover:before {
-    opacity: 1;
-  }
 `;
 
 export const CardHeader = styled.div`
@@ -73,6 +81,12 @@ export const CardHeader = styled.div`
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  
+  @media (max-width: 480px) {
+    margin-bottom: 1rem;
+  }
 `;
 
 export const CharacterName = styled.h2`
@@ -83,6 +97,11 @@ export const CharacterName = styled.h2`
   -webkit-text-fill-color: transparent;
   background-clip: text;
   font-weight: 600;
+  
+  @media (max-width: 480px) {
+    font-size: 1rem;
+    width: 100%; 
+  }
 `;
 
 export const BirthYear = styled.span`
@@ -91,6 +110,10 @@ export const BirthYear = styled.span`
   background: rgba(0,0,0,0.05);
   padding: 0.25rem 0.5rem;
   border-radius: 12px;
+  
+  @media (max-width: 480px) {
+    font-size: 0.7rem;
+  }
 `;
 
 export const AttributeRow = styled.div`
@@ -98,18 +121,32 @@ export const AttributeRow = styled.div`
   gap: 1rem;
   margin-bottom: 1rem;
   align-items: center;
+  
+  @media (max-width: 480px) {
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
 `;
 
 export const AttributeLabel = styled.span`
   font-size: 0.8rem;
   color: var(--text-secondary);
   min-width: 70px;
+  
+  @media (max-width: 480px) {
+    font-size: 0.7rem;
+    min-width: 60px;
+  }
 `;
 
 export const AttributeValue = styled.span`
   font-size: 0.9rem;
   color: var(--text-primary);
   font-weight: 500;
+  
+  @media (max-width: 480px) {
+    font-size: 0.8rem;
+  }
 `;
 
 export const Badge = styled.div<{ color?: string }>`
@@ -121,12 +158,21 @@ export const Badge = styled.div<{ color?: string }>`
   display: inline-block;
   font-weight: 500;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  
+  @media (max-width: 480px) {
+    font-size: 0.65rem;
+    padding: 0.15rem 0.5rem;
+  }
 `;
 
 export const Divider = styled.div`
   height: 1px;
   background: linear-gradient(90deg, transparent, rgba(0,0,0,0.1), transparent);
   margin: 1rem 0;
+  
+  @media (max-width: 480px) {
+    margin: 0.75rem 0;
+  }
 `;
 
 export const FilmBadges = styled.div`
@@ -149,8 +195,16 @@ export const FilmBadge = styled.div<{ filmId: number }>`
   box-shadow: 0 2px 4px rgba(0,0,0,0.15);
   transition: all 0.2s ease;
   
-  &:hover {
-    transform: scale(1.1);
+  @media (hover: hover) {
+    &:hover {
+      transform: scale(1.1);
+    }
+  }
+  
+  @media (max-width: 480px) {
+    width: 22px;
+    height: 22px;
+    font-size: 0.65rem;
   }
 `;
 
@@ -177,13 +231,26 @@ export const Footer = styled.div`
   justify-content: space-between;
   align-items: center;
   margin-top: 1rem;
+  
+  @media (max-width: 480px) {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
 `;
 
 export const Pagination = styled.div`
   display: flex;
-  justify-content: center;
+  justify-content: space-between; 
   align-items: center;
-  gap: 1rem;
+  width: 100%;
   margin-top: 2rem;
   padding: 1.5rem 0;
+  
+  span {
+    text-align: center;
+  }
+  
+  @media (max-width: 480px) {
+    margin-top: 1.5rem;
+  }
 `;

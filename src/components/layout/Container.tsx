@@ -8,7 +8,8 @@ interface ContainerProps {
 }
 
 const StyledContainer = styled.div<ContainerProps>`
-  padding: ${props => props.padding || '1.5rem'};
+  padding: ${props => props.padding || 
+    'clamp(0.75rem, 5vw, 2rem)'}; 
   max-width: ${props => props.maxWidth || '1280px'};
   width: 100%;
   margin: 0 auto;
@@ -19,6 +20,10 @@ const StyledContainer = styled.div<ContainerProps>`
     justify-content: center;
     min-height: 100vh;
   `}
+  
+  @media (max-width: 480px) {
+    padding: ${props => props.padding || '0.75rem'};
+  }
 `;
 
 export const Container = ({ children, ...props }: ContainerProps) => {

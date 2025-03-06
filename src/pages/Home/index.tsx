@@ -20,6 +20,20 @@ const Home = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [isPaginationLoading, setIsPaginationLoading] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+    };
+  }, []);
 
   useEffect(() => {
     const user = localStorage.getItem('user');
@@ -92,11 +106,15 @@ const Home = () => {
           justifyContent: 'space-between',
           alignItems: 'center',
           marginBottom: '2.5rem',
+          flexWrap: isMobile ? 'wrap' : 'nowrap',
+          gap: '1rem'
         }}
       >
-        <h1>Personagens</h1>
-        <ThemeToggle />
-        <Button onClick={handleLogout}>Sair</Button>
+        <h1 style={{ fontSize: isMobile ? '1.5rem' : '2rem' }}>Personagens</h1>
+        <div style={{ display: 'flex', gap: '1rem', marginLeft: isMobile ? '0' : 'auto' }}>
+          <ThemeToggle />
+          <Button onClick={handleLogout} size={isMobile ? 'small' : 'medium'}>Sair</Button>
+        </div>
       </header>
 
       <S.ContentWrapper $isLoading={isPaginationLoading}>

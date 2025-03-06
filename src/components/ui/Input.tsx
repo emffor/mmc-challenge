@@ -21,7 +21,7 @@ const InputLabel = styled.label`
 
 const StyledInput = styled.input<{ hasError?: boolean }>`
   width: 100%;
-  padding: 1rem 1.2rem;
+  padding: clamp(0.75rem, 4vw, 1rem) clamp(1rem, 5vw, 1.2rem);
   background: #ffffff;
   border: 1px solid ${props => props.hasError ? 'var(--error)' : '#e1e5eb'};
   border-radius: var(--border-radius);
@@ -38,6 +38,15 @@ const StyledInput = styled.input<{ hasError?: boolean }>`
   
   &::placeholder {
     color: var(--text-secondary);
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 0.9rem;
+    padding: 0.75rem 1rem;
+  }
+  
+  @supports (-webkit-touch-callout: none) {
+    font-size: 16px; 
   }
 `;
 

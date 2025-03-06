@@ -1,5 +1,4 @@
 import styled from 'styled-components';
-
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'outline';
   size?: 'small' | 'medium' | 'large';
@@ -14,6 +13,7 @@ const ButtonStyled = styled.button<ButtonProps>`
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  white-space: nowrap; 
   
   background: ${props => 
     props.variant === 'outline' ? 'transparent' : 
@@ -38,13 +38,25 @@ const ButtonStyled = styled.button<ButtonProps>`
   
   width: ${props => props.fullWidth ? '100%' : 'auto'};
   
-  &:hover:not(:disabled) {
-    background: ${props => 
-      props.variant === 'outline' ? 'rgba(249, 168, 38, 0.1)' :
-      props.variant === 'secondary' ? '#f1f3f5' : 
-      'var(--accent-hover)'};
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  @media (hover: hover) {
+    &:hover:not(:disabled) {
+      background: ${props => 
+        props.variant === 'outline' ? 'rgba(249, 168, 38, 0.1)' :
+        props.variant === 'secondary' ? '#f1f3f5' : 
+        'var(--accent-hover)'};
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+  }
+  
+  @media (hover: none) {
+    &:active:not(:disabled) {
+      background: ${props => 
+        props.variant === 'outline' ? 'rgba(249, 168, 38, 0.2)' :
+        props.variant === 'secondary' ? '#e9ecef' : 
+        'var(--accent-hover)'};
+      transform: translateY(1px);
+    }
   }
   
   &:disabled {
@@ -52,6 +64,16 @@ const ButtonStyled = styled.button<ButtonProps>`
     cursor: not-allowed;
     transform: none;
     box-shadow: none;
+  }
+  
+  @media (max-width: 480px) {
+    min-height: 40px;
+    min-width: 90px; 
+    font-size: 0.85rem;
+    padding: ${props => 
+      props.size === 'small' ? '0.4rem 0.8rem' : 
+      props.size === 'large' ? '0.8rem 1.2rem' : 
+      '0.6rem 1rem'};
   }
 `;
 
