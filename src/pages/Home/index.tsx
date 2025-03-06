@@ -1,8 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getCharacters } from '../../services/api';
-import * as S from './styles';
 import { Character } from './types';
+import { Container } from '../../components/layout/Container';
+import { Button } from '../../components/ui/Button';
+import { Loader } from '../../components/feedback/Loader';
+import { Grid } from '../../components/layout/Grid';
+import { Card } from '../../components/ui/Card';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -10,17 +14,17 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  
+
   useEffect(() => {
     const user = localStorage.getItem('user');
     if (!user) {
       navigate('/login');
       return;
     }
-    
+
     fetchCharacters();
   }, [page, navigate]);
-  
+
   const fetchCharacters = async () => {
     try {
       setLoading(true);
@@ -38,56 +42,72 @@ const Home = () => {
     const matches = url.match(/\/people\/(\d+)/);
     return matches ? matches[1] : '1';
   };
-  
+
   const handleLogout = () => {
     localStorage.removeItem('user');
     navigate('/login');
   };
-  
+
   return (
-    <S.Container>
-      <S.Header>
+    <Container>
+      <header
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '2.5rem',
+        }}
+      >
         <h1>Star Wars - Personagens</h1>
-        <S.Button onClick={handleLogout}>
-          Sair
-        </S.Button>
-      </S.Header>
-      
+        <Button onClick={handleLogout}>Sair</Button>
+      </header>
+
       {loading ? (
-        <S.Loader>
-          <div className="spinner"></div>
-        </S.Loader>
+        <Loader />
       ) : (
-        <S.Grid>
+        <Grid>
           {characters.map((char, idx) => (
-            <S.Card 
-              key={idx} 
+            <Card
+              key={idx}
               onClick={() => navigate(`/character/${getCharacterId(char.url)}`)}
+              hoverable={true}
             >
               <h2>{char.name}</h2>
-              <p><strong>Gênero:</strong> {char.gender}</p>
-              <p><strong>Nascimento:</strong> {char.birth_year}</p>
-            </S.Card>
+              <p>
+                <strong>Gênero:</strong> {char.gender}
+              </p>
+              <p>
+                <strong>Nascimento:</strong> {char.birth_year}
+              </p>
+            </Card>
           ))}
-        </S.Grid>
+        </Grid>
       )}
-      
-      <S.Pagination>
-        <S.Button 
-          disabled={page === 1 || loading} 
-          onClick={() => setPage(p => p - 1)}
+
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          gap: '1rem',
+          marginTop: '2rem',
+        }}
+      >
+        <Button
+          disabled={page === 1 || loading}
+          onClick={() => setPage((p) => p - 1)}
         >
           Anterior
-        </S.Button>
+        </Button>
         <span>Página {page} de {totalPages}</span>
-        <S.Button 
-          disabled={page === totalPages || loading} 
-          onClick={() => setPage(p => p + 1)}
+        <Button
+          disabled={page === totalPages || loading}
+          onClick={() => setPage((p) => p + 1)}
         >
           Próxima
-        </S.Button>
-      </S.Pagination>
-    </S.Container>
+        </Button>
+      </div>
+    </Container>
   );
 };
 

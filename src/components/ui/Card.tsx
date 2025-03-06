@@ -5,6 +5,7 @@ interface CardProps {
   onClick?: () => void;
   padding?: string;
   hoverable?: boolean;
+  style?: React.CSSProperties; 
 }
 
 const CardContainer = styled.div<{ padding?: string; hoverable?: boolean; onClick?: () => void }>`
@@ -26,12 +27,13 @@ const CardContainer = styled.div<{ padding?: string; hoverable?: boolean; onClic
   `}
 `;
 
-export const Card = ({ children, onClick, padding, hoverable = false }: CardProps) => {
+export const Card = ({ children, onClick, padding, hoverable = false, style }: CardProps) => {
   return (
     <CardContainer 
       onClick={onClick} 
       padding={padding} 
       hoverable={hoverable}
+      style={style} 
     >
       {children}
     </CardContainer>

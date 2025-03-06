@@ -1,7 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import * as S from './styles';
+import { Container } from '../../components/layout/Container';
+import { Input } from '../../components/ui/Input';
+import { Button } from '../../components/ui/Button';
+import { Card } from '../../components/ui/Card';
+import { Loader } from '../../components/feedback/Loader';
 import { RegisterFormData } from './types';
+import * as S from './styles';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -43,57 +48,77 @@ const Register = () => {
   };
 
   return (
-    <S.Container>
-      <S.Form onSubmit={handleSubmit}>
-        <h1>Criar Conta</h1>
-        
-        <S.Input 
-          type="text"
-          name="name" 
-          placeholder="Nome completo" 
-          value={formData.name}
-          onChange={handleChange}
-          required
-        />
-        
-        <S.Input 
-          type="email"
-          name="email" 
-          placeholder="E-mail" 
-          value={formData.email}
-          onChange={handleChange}
-          required
-        />
-        
-        <S.Input 
-          type="password"
-          name="password" 
-          placeholder="Senha" 
-          value={formData.password}
-          onChange={handleChange}
-          required
-        />
-        
-        <S.Input 
-          type="password"
-          name="confirmPassword" 
-          placeholder="Confirmar senha" 
-          value={formData.confirmPassword}
-          onChange={handleChange}
-          required
-        />
-        
-        {error && <S.ErrorMessage>{error}</S.ErrorMessage>}
-        
-        <S.Button type="submit" disabled={loading}>
-          {loading ? 'Carregando...' : 'Registrar'}
-        </S.Button>
-        
-        <S.Link onClick={() => navigate('/login')}>
-          Já tem uma conta? Faça login
-        </S.Link>
-      </S.Form>
-    </S.Container>
+    <Container centerContent padding="2rem">
+      <Card padding="2.5rem" style={{ maxWidth: '450px', width: '100%' }}>
+        <form onSubmit={handleSubmit}>
+          <h1 style={{ 
+            marginBottom: '2rem', 
+            fontSize: '2rem', 
+            fontWeight: 600, 
+            color: 'var(--text-primary)', 
+            textAlign: 'center' 
+          }}>
+            Criar Conta
+          </h1>
+          
+          <Input 
+            type="text"
+            name="name" 
+            placeholder="Nome completo" 
+            value={formData.name}
+            onChange={handleChange}
+            fullWidth
+            required
+          />
+          
+          <Input 
+            type="email"
+            name="email" 
+            placeholder="E-mail" 
+            value={formData.email}
+            onChange={handleChange}
+            fullWidth
+            required
+          />
+          
+          <Input 
+            type="password"
+            name="password" 
+            placeholder="Senha" 
+            value={formData.password}
+            onChange={handleChange}
+            fullWidth
+            required
+          />
+          
+          <Input 
+            type="password"
+            name="confirmPassword" 
+            placeholder="Confirmar senha" 
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            error={error}
+            fullWidth
+            required
+          />
+          
+          <div style={{ marginTop: '1.5rem' }}>
+            <Button 
+              type="submit" 
+              disabled={loading}
+              size="large"
+              fullWidth
+            >
+              {loading ? <Loader size="20px" centered={false} /> : 'Registrar'}
+            </Button>
+          </div>
+          
+          <S.Link onClick={() => navigate('/login')}>
+            Já tem uma conta? Faça login
+          </S.Link>
+        </form>
+      </Card>
+    </Container>
   );
 };
 

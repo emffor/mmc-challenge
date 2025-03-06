@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { Form as LoginForm, Input, Button, Link } from '../Login/styles';
+import { Form as LoginForm,  Link } from '../Login/styles';
 
 export const Container = styled.div`
   display: flex;
@@ -21,4 +21,4 @@ export const ErrorMessage = styled.p`
   font-size: 0.9rem;
 `;
 
-export { Input, Button, Link };
+export { Link };
