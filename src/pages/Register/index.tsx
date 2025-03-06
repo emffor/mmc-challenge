@@ -4,7 +4,7 @@ import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
 import { Loader } from '../../components/feedback/Loader';
 import { RegisterFormData } from './types';
-import * as S from './styles';
+import * as S from '../../styles/authStyles';
 
 const Register = () => {
   const navigate = useNavigate();

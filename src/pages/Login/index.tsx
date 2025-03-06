@@ -4,7 +4,7 @@ import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
 import { Loader } from '../../components/feedback/Loader';
 import { LoginFormData } from './types';
-import * as S from './styles';
+import * as S from '../../styles/authStyles';
 
 const Login = () => {
   const navigate = useNavigate();
