@@ -7,6 +7,7 @@ import { Button } from '../../components/ui/Button';
 import { Loader } from '../../components/feedback/Loader';
 import { Grid } from '../../components/layout/Grid';
 import * as S from './styles';
+import { ThemeToggle } from '../../components/ui/ThemeToggle';
 
 const isValidValue = (value: string): boolean => {
   return !!value && !['unknown', 'n/a', 'none', 'undefined', 'null'].includes(value.toLowerCase());
@@ -93,7 +94,8 @@ const Home = () => {
           marginBottom: '2.5rem',
         }}
       >
-        <h1>Star Wars - Personagens</h1>
+        <h1>Personagens</h1>
+        <ThemeToggle />
         <Button onClick={handleLogout}>Sair</Button>
       </header>
 

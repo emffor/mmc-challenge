@@ -5,6 +5,7 @@ import { Button } from '../../components/ui/Button';
 import { Loader } from '../../components/feedback/Loader';
 import { LoginFormData } from './types';
 import * as S from '../../styles/authStyles';
+import { ThemeToggle } from '../../components/ui/ThemeToggle';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -41,6 +42,10 @@ const Login = () => {
     <S.AuthContainer>
       <S.StarsBackground />
       <S.AuthCard $show={animation}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
+          <ThemeToggle />
+        </div>
+
         <S.LogoArea>
           <S.LogoImage>SW</S.LogoImage>
           <S.LogoText>Star Wars Explorer</S.LogoText>

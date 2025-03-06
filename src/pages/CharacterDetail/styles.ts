@@ -34,14 +34,19 @@ export const CharacterCardWrapper = styled.div<{ $isLoading: boolean }>`
       right: 0;
       bottom: 0;
       background: linear-gradient(90deg, 
-        rgba(255, 255, 255, 0.1) 25%, 
-        rgba(255, 255, 255, 0.2) 50%, 
-        rgba(255, 255, 255, 0.1) 75%);
+        var(--shimmer-start, rgba(255, 255, 255, 0.1)) 25%, 
+        var(--shimmer-mid, rgba(255, 255, 255, 0.2)) 50%, 
+        var(--shimmer-start, rgba(255, 255, 255, 0.1)) 75%);
       background-size: 200% 100%;
       animation: ${shimmer} 1.5s infinite;
       z-index: 1;
       pointer-events: none;
       border-radius: var(--border-radius);
+    }
+
+    [data-theme='dark'] &::before {
+      --shimmer-start: rgba(30, 30, 30, 0.2);
+      --shimmer-mid: rgba(40, 40, 40, 0.3);
     }
   `}
 `;
@@ -61,7 +66,11 @@ export const InfoGrid = styled.div<{ $isSmallScreen?: boolean }>`
     left: 0;
     width: 100%;
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(0,0,0,0.05), transparent);
+    background: linear-gradient(90deg, transparent, var(--divider-color, rgba(0,0,0,0.05)), transparent);
+  }
+
+  [data-theme='dark'] &::after {
+    --divider-color: rgba(255,255,255,0.1);
   }
   
   @media (max-width: 768px) {
@@ -87,9 +96,14 @@ export const InfoItem = styled.div<{ $fullWidth?: boolean }>`
   animation: ${fadeIn} 0.5s ease;
   
   &:hover {
-    background: rgba(249, 249, 249, 0.5);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+    background: var(--hover-bg, rgba(249, 249, 249, 0.5));
+    box-shadow: var(--hover-shadow, 0 4px 15px rgba(0, 0, 0, 0.03));
     transform: translateY(-3px);
+  }
+
+  [data-theme='dark'] &:hover {
+    --hover-bg: rgba(40, 40, 40, 0.5);
+    --hover-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   }
   
   h3 {
@@ -171,14 +185,22 @@ export const FilmItem = styled.li<{ $expanded: boolean; $isSmallScreen?: boolean
   overflow: hidden;
   touch-action: manipulation;
   background: ${props => props.$expanded ? 
-    'linear-gradient(135deg, #f6f9fc 0%, #eef2f7 100%)' : 
-    'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)'};
-  border: 1px solid ${props => props.$expanded ? 'transparent' : '#e0e0e0'};
+    'var(--expanded-film-bg, linear-gradient(135deg, #f6f9fc 0%, #eef2f7 100%))' : 
+    'var(--film-bg, linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%))'};
+  border: 1px solid ${props => props.$expanded ? 'transparent' : 'var(--film-border, #e0e0e0)'};
   animation: ${fadeIn} 0.5s ease;
   transform: ${props => props.$expanded ? 'translateY(-5px)' : 'translateY(0)'};
   box-shadow: ${props => props.$expanded ? 
-    '0 15px 30px rgba(0, 0, 0, 0.1), 0 5px 15px rgba(0, 0, 0, 0.05)' : 
-    '0 2px 5px rgba(0, 0, 0, 0.05)'};
+    'var(--expanded-film-shadow, 0 15px 30px rgba(0, 0, 0, 0.1), 0 5px 15px rgba(0, 0, 0, 0.05))' : 
+    'var(--film-shadow, 0 2px 5px rgba(0, 0, 0, 0.05))'};
+
+  [data-theme='dark'] & {
+    --film-bg: linear-gradient(135deg, #2a2a2a 0%, #1e1e1e 100%);
+    --expanded-film-bg: linear-gradient(135deg, #222 0%, #2a2a2a 100%);
+    --film-border: #444;
+    --film-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    --expanded-film-shadow: 0 15px 30px rgba(0, 0, 0, 0.4), 0 5px 15px rgba(0, 0, 0, 0.3);
+  }
   
   &::before {
     content: '';

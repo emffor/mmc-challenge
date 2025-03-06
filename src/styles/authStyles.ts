@@ -22,10 +22,14 @@ export const AuthContainer = styled.div`
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+  background: var(--auth-bg, linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%));
   position: relative;
   overflow: hidden;
   padding: 1rem;
+
+  [data-theme='dark'] & {
+    --auth-bg: linear-gradient(135deg, #000000 0%, #121212 50%, #1e1e1e 100%);
+  }
 `;
 
 export const StarsBackground = styled.div`
@@ -64,11 +68,11 @@ export const StarsBackground = styled.div`
 `;
 
 export const AuthCard = styled.div<{ $show: boolean }>`
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--auth-card-bg, rgba(255, 255, 255, 0.9));
   backdrop-filter: blur(10px);
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--auth-card-shadow, 0 8px 32px rgba(0, 0, 0, 0.3));
   transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   width: 100%;
   max-width: 450px;
@@ -81,7 +85,13 @@ export const AuthCard = styled.div<{ $show: boolean }>`
   }
   
   &:hover {
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+    box-shadow: var(--auth-card-hover-shadow, 0 12px 40px rgba(0, 0, 0, 0.4));
+  }
+
+  [data-theme='dark'] & {
+    --auth-card-bg: rgba(30, 30, 30, 0.9);
+    --auth-card-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    --auth-card-hover-shadow: 0 12px 40px rgba(0, 0, 0, 0.7);
   }
 `;
 
@@ -112,21 +122,29 @@ export const LogoText = styled.h2`
   margin: 0;
   color: var(--text-primary);
   font-size: 1.5rem;
-  background: linear-gradient(90deg, var(--text-primary), var(--text-secondary));
+  background: var(--logo-gradient, linear-gradient(90deg, var(--text-primary), var(--text-secondary)));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   font-weight: 600;
+
+  [data-theme='dark'] & {
+    --logo-gradient: linear-gradient(90deg, #ffffff, var(--accent));
+  }
 `;
 
 export const FormTitle = styled.h1`
   font-size: 2rem;
   margin-bottom: 2rem;
   text-align: center;
-  background: linear-gradient(90deg, var(--text-primary), var(--accent));
+  background: var(--title-gradient, linear-gradient(90deg, var(--text-primary), var(--accent)));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   font-weight: 700;
+
+  [data-theme='dark'] & {
+    --title-gradient: linear-gradient(90deg, #ffffff, var(--accent));
+  }
 `;
 
 export const InputGroup = styled.div`

@@ -16,6 +16,19 @@ export const GlobalStyle = createGlobalStyle`
     --transition: all 0.3s ease;
   }
 
+  [data-theme='dark'] {
+    --bg-primary: #121212; 
+    --bg-secondary: #1e1e1e; 
+    --text-primary: #e0e0e0;
+    --text-secondary: #a0a0a0;
+    --accent: #F9A826;
+    --accent-hover: #ffb84d;
+    --card-bg: #1e1e1e; 
+    --success: #34c759;
+    --error: #ff3b30;
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+
   * {
     margin: 0;
     padding: 0;
